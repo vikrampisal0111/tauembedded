@@ -11,11 +11,12 @@ void toggle_led() {
 void toggle_rgb() {
 	if(IOPIN0 & BIT9) IOPIN0 &= ~BIT9;
 	else			   IOPIN0 |= BIT9;
+
 	if(IOPIN0 & BIT8) IOPIN0 &= ~BIT8;
 	else			   IOPIN0 |= BIT8;
+	
 	if(IOPIN0 & BIT7) IOPIN0 &= ~BIT7;
 	else			   IOPIN0 |= BIT7;
-
 }
 
 void systick_periodic_task() {
@@ -29,49 +30,53 @@ void systick_periodic_task() {
 #include "timer/systick.c"
 #include "timer/busywait.c"
 
-volatile int v = 100;
+#define OFF_FREQ_HZ		0	
+#define ON_FREQ_HZ		500
+#define FREQ_STEP		ON_FREQ_HZ/8
 
-void dimmChange()
+#define JOYSTICK_LEFT   ((IOPIN0 & BIT17) && (IOPIN0 & BIT19))
+#define JOYSTICK_RIGHT 	((IOPIN0 & BIT18) && (IOPIN0 & BIT20))
+
+#define MICROSEC	1000000
+
+
+volatile int freq = OFF_FREQ;
+volatile int wait_time = 100;
+
+void change_freq()
 {
-	if ((IOPIN0 & BIT17) && (IOPIN0 & BIT19))
+	if (JOYSTICK_LEFT)
 	{
-		// Left.
-//		v += 1000000;
-		v += 1000;
-		PWMPR += 1000;
-//		toggle_led();
+		freq += FREQ_STEP;
 	}
-	else if ((IOPIN0 & BIT18) && (IOPIN0 & BIT20))
+	else if (JOYSTICK_RIGHT)
 	{
-		// Right.
-//		v -= 1000000;
-		v -= 1000;
-		PWMPR -= 1000;
-//		toggle_led();
+		freq -= FREQ_STEP;
+	}
 
-	}
-	
+}
+
+void rgbInit() {
+	IODIR0 = ~(BIT16 | BIT17 | BIT18 | BIT19 | BIT20);
+	IODIR0 = BIT7 | BIT8 | BIT9;
 }
 
 int main()
 {
-	IODIR0 = ~(BIT16 | BIT17 | BIT18 | BIT19 | BIT20);
-	IODIR0 = BIT7 | BIT8 | BIT9;
 	IODIR0 |= BIT10;
 
-
-	PWMTCR = BIT1;
-	PWMMR2 = 10000; // initial match value for PWM2.	
-	PWMMCR = BIT7; // Reset on PWMMR2 match.
-	PWMPCR = BIT2;
-	PWMTCR = BIT0 | BIT3; // Enable counters and enable PWM.
-
+	rgbInit();
 	busywaitInit();
+
 	while(1) {
 		busywait(v);
-		dimmChange();
+		change_freq();
 		toggle_rgb();
-		//toggle_led();
 	}
 
 }
+
+
+
+
+
