@@ -1,0 +1,30 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Basics - Report
+-----------------
+
+2. We used interrupts to solve the problem. 
+We initialized a state variable which differentiated between two states:
+a) Waiting on the P0.14 event
+b) Waiting for the timer event
+In each state we disabled the other interrupt and 
+enabled the interrupt for the event.
+EXTINT was reset every time because when disabling using 
+VICIntEnClr the interrupt flag is still raised.
+
+The 50ms time was not enough for the debouncing. 
+Testing with 100ms showed better results.
+
+3. We tested using longer time intervals which 
+were easier to for us to control and react to.
+
+4. The emulation of the bicycle blinker is achieved using three states:
+a) initial off state - clears P0.14 press INT and switches the led on, transfers control to state (b)
+b) on state - clears P0.14 press INT, starts timer0 and transfers control to state (c)
+c) blink state - 
+     if the INT is P0.14 press - clears P0.14 press INT, stops timer0, 
+     							switches led off and transfers control to state (a) 
+     							
+     if the INT is timer0 - toggle the led and clear timer0 INT
