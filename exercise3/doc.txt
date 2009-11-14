@@ -3,7 +3,9 @@ Eyal Widder 064986375
 Michael Gendelman 304332018
 
  Exercise 4 - Report
------------------
+---------------------
 
 
+5. Up to 8 LM75's can serve on one I2C bus. This is because LM75 has 3 address selection bits.
 
+6. 
