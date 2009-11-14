@@ -1,0 +1,33 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Exercise 3 - Report
+-----------------
+
+We did not have enough time to complete the exercise.
+This is partly due to the fact that we thought that questions 4 and 5
+should be imlepmented using the boards PWM capabilities, which we 
+spent a lot of time understanding. After failing to make it work
+we asked Dror who told us we should implement it by hand.
+
+If possible We would very much like to complete this exercise at the next lab.
+
+1. We implemented a fiq isr which runs systic_periodic_task(). 
+The fiq is run every milisecond using the built in counter.
+
+2. We used a systic_periodic_task which is very similar to the presented example, 
+except that the constant was replaced so that the toggle period would be 1024 ms.
+
+3. busywaitInit() was implemented by performing 100000 simple processor operations 
+and running the counter in parallel. Then the ration of instuctions per microsecond was calculated and placed in g_calib.
+busywait() multiplies the number of microseconds we want to wait by g_calib and runs a simple loop for this amount of iters.
+
+4.
+
+5.
+
+7. No, the bulb will not stop emmiting light because it will not have 
+enough time to cool down between the periods it is on.
+
+

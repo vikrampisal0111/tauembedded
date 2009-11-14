@@ -1,0 +1,36 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Exercise 2 - Report
+-----------------
+
+1. In lcdInit we set used lcd_en_rs_our to set E and RS to output mode. 
+Then we set all data bits and R/!W as output (lcd_data8_out, lcd_rw_out) 
+and turned the lcd backlight on.
+
+2. We implemented busywait by multiplying the number of microseconds we want to wait 
+by the number of instructions that can be performed in one microsecond on 60MHz (microsecs * ops/microsec = ops)
+and then iterating this amount of ops.
+
+lcdGoto was impelmented by reading the current address of the cursor, 
+finding the distance from the needed destination and moving in the right direction using inst
+
+3. We implemented all macros by using the IODIR, IOPIN and IOSET registers. 
+In addition we implemented several utility functions to easily 
+read/write data to/from the lcd and to send instructions.
+We extracted the main operations to the generic_set function, 
+which is used to both send instructions and write data.
+
+4. Instructions from the lcd manual were followed to write the 4 bit functions. 
+Utility functions were renamed to <name>8 and <name>4 and everything was 
+generalized using the set_bitmode function which sets the bit mode to use. 
+This way It is possible to use one generic interface (inst/write) for both 4 and 8 bit.
+
+5. (b+c) An lcdPrintString function was implemented using lcdPrintChar and an instruction 
+which transfers the cursor to the second line. After printing all chars, 
+if the string was longer than the lcd width it was scrolled to the right one char at a time.
+
+The exercise was very interesting and allowed us to learn about timing and working with lcd devices.
+
+
