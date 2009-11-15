@@ -73,7 +73,7 @@ LPC21ISP_FLASHFILE = $(TARGET).hex
 # feature - see Philips AppNote):
 LPC21ISP_CONTROL = -control
 program: $(TARGET).hex
-	$(LPC21ISP) $(LPC21ISP_CONTROL) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
+	$(LPC21ISP) -term $(LPC21ISP_CONTROL) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 	@echo "Download done."
 
 # Create final output file (.hex) from ELF output file.
