@@ -5,7 +5,18 @@ Michael Gendelman 304332018
  Exercise 4 - Report
 ---------------------
 
+1. We are using the uart, the test has passed.
+
+2. We implemented the i2cInit() function by setting the I2CEN bit, and setting the I20SCLL/I20CLH registers
+ according to the formula in the documentation, we could not set 400Khz bit rate so we aimed at 375Khz.
+ The rest of the driver we implemented according to the MCU documentation, we used polling on the SI bit and enabled
+ the IRQ that handles the interrupt, we check the status after each SI clearing and implemented the read/write features.
+
+3. We tries to test the driver for reading 2 bytes from the peripheral however we have bugs and we receive the SLA+R!W back on the bus.
+It is possible that we need to clear the START bit.
+
+4. We implemented the temperature conversion function using the LM75 document and tested it apart from the driver code.
 
 5. Up to 8 LM75's can serve on one I2C bus. This is because LM75 has 3 address selection bits.
 
-6. 
+6. TBD.
