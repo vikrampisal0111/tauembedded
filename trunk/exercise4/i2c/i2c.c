@@ -1,4 +1,154 @@
 
+// I20CON register bits
+#define I2EN	BIT6 // I2C Enable/Disable
+#define STA		BIT5 // START flag
+#define STO		BIT4 // STOP flag
+#define SI		BIT3 // Interrupt flag 
+#define AA		BIT2 // Assert Acknowledge
+
+//States:
+#define STAT_BUS_ERR		0x00
+
+// Master States:
+//   General
+#define STAT_START		    0x08
+#define STAT_REPSTART 	    0x10
+
+//   Master transmitter
+#define STAT_SLA_W_ACK	    0x18
+#define STAT_SLA_W_NACK	    0x20
+#define STAT_I2DAT_ACK      0x28
+#define STAT_I2DAT_NACK		0x30
+
+//   Master receiver
+#define STAT_SLA_R_ACK		0x40
+#define STAT_SLA_R_NACK     0x48
+#define STAT_I2DAT_ACK		0x50
+#define	STAT_I2DAT_NACK		0x58
+
+// Utility macros
+#define WAIT_SI() 	\
+	while (!(I20CONSET & SI)) { }
+
+#define PRINT_SI(x)       \
+	print("SI --> ");     \
+	printNum(x);          \
+	print("\n");      
+
+#define PRINT_STAT_ERR()                        \
+	print("Error in status register: STAT = "); \
+	printHex(I20STAT, 4);                       \
+	print("\n");								
+
+#define CHECK_STAT(stat)             \
+	if (I20STAT != (stat)) {         \
+		PRINT_STAT_ERR();            \
+		return -1;                   \
+	}
+
+// Global data vars
+uint8_t *g_command = NULL;
+int32_t g_command_len = 0;
+
+uint8_t *g_response = NULL;
+int32_t g_response_len = 0;
+
+int g_trans_count = 0;
+int g_recv_count = 0;
+
+void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
+	
+	uint8_t status = I2STAT;
+	
+	switch(status) {
+		case STAT_START:
+			//I20CONCLR = STA
+			//print("Clear START\n");
+	
+			// Input slave address and R!W
+			I20DAT = slave_address | g_rw;
+			print("Writing slave address for write op");
+			printHex(slave_address, 4);
+			print("\n");
+			
+			I20CONSET = AA;
+			g_count = 0;
+
+			break;
+		case STAT_SLA_W_ACK:
+			// Put next command byte in data register.
+			I20DAT = g_command[g_trans_count];
+
+			print("Setup data with next command byte:");
+			printHex(g_command[g_trans_count], 4);
+			print("\n");
+			
+			g_trans_count++
+
+			break;
+		case STAT_REPSTART:
+			break;
+		case STAT_SLA_W_NACK:
+			// Transmit stop condition
+			I20CONSET = STO | AA;
+			break;
+		case STAT_I2DAT_ACK:
+			g_trans_count++;
+
+			if(g_count == g_command_len) { 
+				I20CONSET = STO | AA;
+			}
+			else {
+				I20DAT = command[i];
+				I20CONSET = AA;
+			}
+
+			break;
+		case STAT_I2DAT_NACK:
+			// Transmit stop cond
+			I20CONSET = STO | AA;
+			break;
+		
+		// Master Receiver states:
+		case STAT_SLA_R_ACK:
+			I20CONSET = AA;
+			break;
+
+		case STAT_SLA_R_NACK:
+			I20CONSET = STO | AA;
+			break;
+		
+		case STAT_I2DAT_ACK:
+			// Setup next command byte to data register.
+			g_response[g_recv_count] = I20DAT;
+
+			print("Read next response byte:");
+			printHex(g_response[g_recv_count], 4);
+			print("\n");
+			
+			g_trans_count++;
+
+			if(g_count != g_recv_len) {
+				I20CONSET = AA;
+			}
+			else {
+				I20CONCLR = AA;
+			}
+
+			break;
+		case STAT_I2DAT_NACK:
+			I20CONSET = STO | AA;
+			break;
+
+		default:
+			PRINT_STAT_ERR();
+	}
+
+	// Clear the SI bit
+	I20CONSLR = SI;
+	//PRINT_SI(0);
+}
+
 /*
 Set the bit frequency to I2_BIT_RATE
 */
@@ -41,173 +191,36 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 						  uint8_t *response,
 						  int32_t response_len) 
 {
+	// Enable I2C interface 
+	I20CONSET = I2EN
+	I20CONCLR = (STA | SI | AA)
+	print("Enabled I2C\n")
+
+	g_command = command;
+	g_command_len = command_len;
+
+	g_response = response;
+	g_response_len = response_len;
+
 	if (command_len > 0)
 	{
-	// Start I2 master transact.
-	I20CONSET = BIT5;
-	print("START\n");
+		g_rw = 0;
 
-	// Wait for SI to raise
-	while (!(I20CONSET & BIT3)) { }
-	print("SI --> 1\n");
+		I20CONSET = STA;
+		print("START\n");
 
-	// Check correct status
-	if (I20STAT != 0x08) {
-		print("Error in status register: STAT = ");
-		printHex(I20STAT, 4);
-		print("\n");
-		return -1;
-	}
-	
-	// Input slave address and R!W
-	I20DAT = slave_address | 0;
-	print("Writing slave address for write op");
-	printHex(slave_address, 4);
-	print("\n");
 
-	// Clear SI
-	I20CONCLR = BIT3;
-	print("SI --> 0\n");
-
-	// Wait for SI to raise
-	while (!(I20CONSET & BIT3)) { }
-	print("SI --> 1\n");
-
-	// no ack received
-	if (I20STAT != 0x18)
-	{
-		print("Error in status register: STAT = ");
-		printHex(I20STAT, 4);
-		print("\n");
-		return -1;
-	}
-
-	// Write the command byte
-	for (int i = 0; i < command_len; i++) {
-		
-		// Setup next command byte to data register.
-		I20DAT = command[i];
-		print("setup data with next command byte:");
-		printHex(command[i],4);
-		print("\n");
-
-		// Clear SI
-		I20CONCLR = BIT3;
-		print("SI --> 0");
-
-		// Wait for SI to raise
- 	 	while (!(I20CONSET & BIT3)) { }
-		print("SI --> 1");
-
-		if (I20STAT != 0x18)
-		{
-			print("Error in status register: STAT = ");
-			printHex(I20STAT, 4);
-			print("\n");
-			return -1;
-		}
-	}
 	} // command_len > 0
 
 	if (response_len > 0)
 	{
-	// Start I2 master transact.
-	I20CONSET = BIT5;
-	print("START\n");
+		g_rw = 1;
 
-	// Wait for SI to raise
-	while (!(I20CONSET & BIT3)) { }
-	print("SI --> 1\n");
-
-
-	// Check correct status
-	if (I20STAT != 0x08) {
-		print("Error in status register: STAT = ");
-		printHex(I20STAT, 4);
-		print("\n");
-		return -1;
-	}
-	
-	// Input slave address and R!W
-	I20DAT = slave_address | 1;
-	print("Writing slave address for read op");
-	printHex(slave_address | 1, 4);
-	print("\n");
-
-
-	// Clear SI
-	I20CONCLR = BIT3;
-	print("SI --> 0\n");
-
-	// Wait for SI to raise
-	while (!(I20CONSET & BIT3)) { }
-	print("SI --> 1\n");
-
-	// no ack received
-	if (I20STAT != 0x40)
-	{
-		print("Error in status register: STAT = ");
-		printHex(I20STAT, 4);
-		print("\n");
-		return -1;
-	}
-
-	// Read the response 
-	for (int i = 0; i < response_len; i++) {
-		
-		if (i < response_len - 1)
-		{
-			// Set the AA bit
-			I20CONSET = BIT2;			
-			print("AA --> 1\n");
-		}
-		else
-		{
-			// Clear the AA bit
-			I20CONCLR = BIT2;
-			print("AA --> 0\n");
-		}
-
-		// Setup next command byte to data register.
-		response[i] = I20DAT;
-		print("read next response byte:");
-		printHex(response[i],4);
-		print("\n");
-
-		// Clear SI
-		I20CONCLR = BIT3;
-		print("SI --> 0\n");
-
-		// Wait for SI to raise
- 	 	while (!(I20CONSET & BIT3)) { }
-		print("SI --> 1\n");
-
-		if (I20STAT != 0x40)
-		{
-			print("Error in status register: STAT = ");
-			printHex(I20STAT, 4);
-			print("\n");
-			return -1;
-		}		
-
-	}
-
-
-	// Set STOP bit
-	I20CONSET = BIT4;
-	print("STOP\n");
-
-	// Wait for SI to raise
-	while (!(I20CONSET & BIT3)) { }
-	print("SI --> 1\n");
-
-
+		// Start I2 master transact.
+		I20CONSET = STA;
+		print("START\n");
 
 	} // response_len > 0
-
-
-
 }
-
 
 
