@@ -1,4 +1,6 @@
 
+#define DEBUG
+
 // I20CON register bits
 #define I2EN	BIT6 // I2C Enable/Disable
 #define STA		BIT5 // START flag
@@ -8,6 +10,7 @@
 
 //States:
 #define STAT_BUS_ERR		0x00
+#define STAT_NO_INFO		0xF8
 
 // Master States:
 //   General
@@ -62,29 +65,27 @@ int g_rw = 0;
 
 void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 	
-	uint8_t status = I2STAT;
+	uint8_t status = I20STAT;
 	
 	switch(status) {
 		case STAT_START:
-			//I20CONCLR = STA
-			//print("Clear START\n");
-	
 			// Input slave address and R!W
 			I20DAT = g_slave_address | g_rw;
+#ifdef DEBUG
 			print("Writing slave address for write op");
 			printHex(g_slave_address, 4);
 			print("\n");
-			
+#endif			
 			I20CONSET = AA;
 			break;
 		case STAT_SLA_W_ACK:
 			// Put next command byte in data register.
 			I20DAT = g_command[g_trans_count];
-
+#ifdef DEBUG
 			print("Setup data with next command byte:");
 			printHex(g_command[g_trans_count], 4);
 			print("\n");
-			
+#endif
 			g_trans_count++;
 
 			break;
@@ -123,14 +124,14 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 		case STAT_R_DAT_ACK:
 			// Setup next command byte to data register.
 			g_response[g_recv_count] = I20DAT;
-
+#ifdef DEBUG
 			print("Read next response byte:");
 			printHex(g_response[g_recv_count], 4);
 			print("\n");
-			
+#endif
 			g_trans_count++;
 
-			if(g_recv_count != g_recv_len) {
+			if(g_recv_count != g_response_len) {
 				I20CONSET = AA;
 			}
 			else {
@@ -142,13 +143,17 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 			I20CONSET = STO | AA;
 			break;
 
+		case STAT_BUS_ERR:
+			I20CONSET = STO;
+			break;
 		default:
+#ifdef DEBUG
 			PRINT_STAT_ERR();
+#endif
 	}
 
 	// Clear the SI bit
 	I20CONCLR = SI;
-	//PRINT_SI(0);
 }
 
 /*
@@ -156,19 +161,21 @@ Set the bit frequency to I2_BIT_RATE
 */
 void i2cInit() 
 {
-
+	// Select P0.2, P0.3 pin functions to be SCL0 and SDA0 respectively
 	PINSEL0 |= (BIT4 | BIT6);
 	PINSEL0 &= ~(BIT5 | BIT7);
-
-	// Set the I20 Enable bit, master mode.
-	I20CONSET = 0x40;
 
 	// Setup the I20 bit rate.
 	I20SCLH = ((CLOCKS_PCLK/I2C_BIT_RATE)/2);
 	I20SCLL = ((CLOCKS_PCLK/I2C_BIT_RATE)/2);
+	
+	// Clear all flags
+	I20CONCLR = 0xFF;          
+
+	// Set the I20 Enable bit, master mode.
+	I20CONSET = I2EN;
 
 	print("Init the I2 controller\n");
-
 }
 
 
@@ -193,8 +200,6 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 						  uint8_t *response,
 						  int32_t response_len) 
 {
-	// Enable I2C interface 
-	I20CONSET = I2EN;
 	I20CONCLR = (STA | SI | AA);
 	print("Enabled I2C\n");
 
@@ -205,7 +210,9 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 
 	g_response = response;
 	g_response_len = response_len;
-
+	
+	// TODO: figure out how control flow works ?
+	// When do we need to set g_rw ?
 	if (command_len > 0)
 	{
 		g_rw = 0;

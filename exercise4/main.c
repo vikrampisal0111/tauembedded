@@ -11,17 +11,18 @@
 #define I2C_BIT_RATE	375000
 
 #include <stdint.h>
+
 #define UART0_BAUD_RATE 19200
 #include "uart/uart0-polling.c"
 #define  print_char(x) uart0SendByte(x)
 #include "uart/print.c"
+
 #include "i2c/i2c.c"
+
+#define MASK_8BIT 	0xFF
 
 float tempdata_to_celsius(uint16_t temp) 
 {
-#define BIT16		0x8000
-#define MASK_8BIT 	0xFF
-
 	int msb = (temp & BIT16) >> 15;
 	int ctemp = (temp >> 7) & MASK_8BIT;
 
@@ -40,7 +41,13 @@ int main()
 	int32_t return_code; 
 	uint8_t response[2] = {0};
 
-	VICIntSelect = 0;
+	// Select an enable I2C0 Interrupts
+	// Use FIQ
+	VICIntSelect = BIT9;
+
+	// Use IRQ
+	// VICIntSelect = 0
+	
 	VICIntEnable = BIT9;
 	enable_interrupts();
 
