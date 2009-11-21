@@ -1,6 +1,13 @@
 #include <lpc2000/io.h>
 #include <lpc2000/interrupt.h>
  
+#define CLOCKS_PCLK		3000000
+#define UART0_BAUD_RATE 19200
+#include "uart/uart0-polling.c"
+#define  print_char(x) uart0SendByte(x)
+#include "uart/print.c"
+
+
 // Count milliseconds
 uint32_t msecs = 0;
 
@@ -8,7 +15,7 @@ void toggle_led() {
 	if(IOPIN0 & BIT10) IOPIN0 &= ~BIT10;
 	else			   IOPIN0 |= BIT10;
 }
-
+/*
 void _systick_periodic_task() {
 	msecs++;
 
@@ -16,7 +23,7 @@ void _systick_periodic_task() {
 		toggle_led();
 	}
 }
-
+*/
 
 void toggle_rgb() {
 	if(IOPIN0 & BIT9) IOPIN0 &= ~BIT9;
@@ -29,10 +36,6 @@ void toggle_rgb() {
 	else			   IOPIN0 |= BIT7;
 }
 
-
-#include "timer/systick.c"
-#include "timer/busywait.c"
-
 #define MICROSEC		1000000
 
 #define OFF_FREQ_HZ		0	
@@ -41,8 +44,8 @@ void toggle_rgb() {
 
 #define OFF_WAIT_TIME	(MICROSEC/ON_FREQ_HZ)
 
-#define JOYSTICK_LEFT   ((IOPIN0 & BIT17) && (IOPIN0 & BIT19))
-#define JOYSTICK_RIGHT 	((IOPIN0 & BIT18) && (IOPIN0 & BIT20))
+#define JOYSTICK_LEFT   (((IOPIN0 & BIT16))) //&& (IOPIN0 & BIT19))
+#define JOYSTICK_RIGHT 	(((IOPIN0 & BIT18))) //&& (IOPIN0 & BIT20))
 
 #define IODIR_IN(BITS)  (~(BITS))
 #define IODIR_OUT(BITS)	 (BITS)
@@ -59,26 +62,26 @@ volatile int wait_time = OFF_WAIT_TIME;
 // Frequency scaling function
 
 // Logarithmic
-void inc_freq_log(int freq) {
-	freq <<= 2;
+void inc_freq_log() {
+	freq <<= 1;
 }
 
-void dec_freq_log(int freq) {
-	freq >>= 2;
+void dec_freq_log() {
+	freq >>= 1;
 }
 
 // Linear
-void inc_freq_lin(int freq) {
+void inc_freq_lin() {
 	freq += FREQ_STEP;
 }
 
-void dec_freq_lin(int freq) {
+void dec_freq_lin() {
 	freq -= FREQ_STEP;
 }
 
 // Default is linear
-void (*inc_freq)(int) = inc_freq_lin;
-void (*dec_freq)(int)= dec_freq_lin;
+void (*inc_freq)() = inc_freq_lin;
+void (*dec_freq)()= dec_freq_lin;
 
 
 // Set frequenct scaling functions
@@ -87,12 +90,12 @@ void set_freq_scale(int scale)
 	switch(scale) 
 	{
 		case LOG_SCALE:
-			freq = 1
+			freq = 1;
 			inc_freq = inc_freq_log;
 			dec_freq = dec_freq_log;
 			break;
 		case LIN_SCALE:
-			freq = 0
+			freq = 0;
 			inc_freq = inc_freq_lin;
 			dec_freq = dec_freq_lin;
 			break;
@@ -103,13 +106,12 @@ void change_freq()
 {
 	if (JOYSTICK_LEFT && freq < ON_FREQ_HZ)
 	{
-		inc_freq(freq)
-		//freq += FREQ_STEP;
+		inc_freq();
 	}
 	else if (JOYSTICK_RIGHT && freq > OFF_FREQ_HZ)
 	{
 		//freq -= FREQ_STEP;
-		dec_freq(freq);
+		dec_freq();
 	}
 
 	if(freq != OFF_FREQ_HZ) 
@@ -117,8 +119,6 @@ void change_freq()
 		wait_time = MICROSEC/freq;
 	}
 }
-
-void change_freq_log
 
 void systick_periodic_task() 
 {
@@ -129,6 +129,10 @@ void systick_periodic_task()
 	}
 
 }
+
+#include "timer/systick.c"
+#include "timer/busywait.c"
+
 
 void joystickInit() 
 {
@@ -145,11 +149,14 @@ int main()
 {
 	IODIR0 |= BIT10;
 
+	uart0Init();
+	systickInit();
 	joystickInit();
 	rgbInit();
 	busywaitInit();
 
 	while(1) {
+		printNum(wait_time);
 		busywait(wait_time);
 		
 		if (freq != OFF_FREQ_HZ) {
