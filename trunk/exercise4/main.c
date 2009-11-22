@@ -18,6 +18,7 @@
 #include "uart/print.c"
 
 #include "i2c/i2c.c"
+#include "lcd.c"
 
 #define MASK_8BIT 	0xFF
 
@@ -37,27 +38,32 @@ float tempdata_to_celsius(uint16_t temp)
 
 int main()
 {
-		
 	int32_t return_code; 
 	uint8_t response[2] = {0};
+	int temp = 0;
+ 	char tempStr[3] = {0};
 
 	// Select an enable I2C0 Interrupts
 	// Use FIQ
 	VICIntSelect = BIT9;
-
-	// Use IRQ
-	// VICIntSelect = 0
-	
 	VICIntEnable = BIT9;
 	enable_interrupts();
 
 	uart0Init();
 	i2cInit();
+	lcdInit();
 
-	return_code = i2cMasterTransact(0x90, 0, 0, response, 2);
+	while(1) {
+		return_code = i2cMasterTransact(0x90, 0, 0, response, 2);
+		temp = (int)tempdata_to_celsius((response[0]<<8) + response[1]);
 
-	printNum((int)tempdata_to_celsius((response[0]<<8) + response[1]));
-
+		tempStr[0] = '0' + (temp / 10);
+		tempStr[1] = '0' + (temp % 10);
+		lcdGoto(0);
+		lcdPrintString(tempStr);
+		
+		busywait(10000);
+	}
 }
 
 
