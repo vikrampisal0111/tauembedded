@@ -37,6 +37,14 @@ float tempdata_to_celsius(uint16_t temp)
 	return ctemp/2.0;
 }
 
+volatile int g_complete = 0;
+
+void onComplete()
+{
+	print("completed");
+	g_complete = 1;
+}
+
 int main()
 {
 	int32_t return_code; 
@@ -62,7 +70,10 @@ int main()
 	lcdInit();
 
 	while(1) {
-		return_code = i2cMasterTransact(0x90, 0, 0, response, 2);
+		return_code = i2cMasterTransact(0x90, 0, 0, response, 2, onComplete);
+
+		while (g_complete == 0) {}
+		g_complete = 0;
 		temp = (int)tempdata_to_celsius((response[0]<<8) + response[1]);
 
 		printNum(temp);
