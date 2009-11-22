@@ -50,23 +50,25 @@
 	}
 
 // Global data vars
-uint8_t g_slave_address = 0;
+volatile uint8_t g_slave_address = 0;
 
-uint8_t *g_command = 0;
-int32_t g_command_len = 0;
+volatile uint8_t *g_command = 0;
+volatile int32_t g_command_len = 0;
 
-uint8_t *g_response = 0;
-int32_t g_response_len = 0;
+volatile uint8_t *g_response = 0;
+volatile int32_t g_response_len = 0;
 
-int g_trans_count = 0;
-int g_recv_count = 0;
+volatile int g_trans_count = 0;
+volatile int g_recv_count = 0;
 
-int g_rw = 0;
+volatile int g_rw = 0;
+
+volatile int g_transact_ended = 0;
 
 void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 	
 	uint8_t status = I20STAT;
-	
+        print("in fiq\n");	
 	switch(status) {
 		case STAT_START:
 			// Input slave address and R!W
@@ -77,6 +79,7 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 			print("\n");
 #endif			
 			I20CONSET = AA;
+			I20CONCLR = STA;
 			break;
 		case STAT_SLA_W_ACK:
 			// Put next command byte in data register.
@@ -86,9 +89,8 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 			printHex(g_command[g_trans_count], 4);
 			print("\n");
 #endif
-			g_trans_count++;
 
-			break;
+		break;
 		case STAT_REPSTART:
 			break;
 		case STAT_SLA_W_NACK:
@@ -97,9 +99,23 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 			break;
 		case STAT_T_DAT_ACK:
 			g_trans_count++;
+#ifdef DEBUG
+			print("Setup data with next command byte:");
+			printHex(g_command[g_trans_count], 4);
+			print("\n");
+			print("transcount=");
+			printNum(g_trans_count);
+			print("\n");
+#endif
 
 			if(g_trans_count == g_command_len) { 
-				I20CONSET = STO | AA;
+				if(g_response_len > 0) {
+					I20CONSET = STA | STO | AA;
+					g_rw = 1;
+				}
+				else {
+					I20CONSET = STO | AA;
+				}
 			}
 			else {
 				I20DAT = g_command[g_trans_count];
@@ -114,10 +130,17 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 		
 		// Master Receiver states:
 		case STAT_SLA_R_ACK:
+#ifdef DEBUG                    
+                        print("STAT_SLA_R_ACK");
+#endif
+
 			I20CONSET = AA;
 			break;
 
 		case STAT_SLA_R_NACK:
+#ifdef DEBUG			
+			print("STAT_SLA_R_NACK");
+#endif
 			I20CONSET = STO | AA;
 			break;
 		
@@ -129,7 +152,7 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 			printHex(g_response[g_recv_count], 4);
 			print("\n");
 #endif
-			g_trans_count++;
+			g_recv_count++;
 
 			if(g_recv_count != g_response_len) {
 				I20CONSET = AA;
@@ -140,7 +163,12 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 
 			break;
 		case STAT_R_DAT_NACK:
+#ifdef DEBUG                    
+                        print("STAT_R_DAT_NACK\n");
+#endif
+
 			I20CONSET = STO | AA;
+			g_transact_ended = 1;
 			break;
 
 		case STAT_BUS_ERR:
@@ -210,28 +238,18 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 
 	g_response = response;
 	g_response_len = response_len;
-	
-	// TODO: figure out how control flow works ?
-	// When do we need to set g_rw ?
-	if (command_len > 0)
-	{
-		g_rw = 0;
 
-		I20CONSET = STA;
-		print("START\n");
-
-
-	} // command_len > 0
-
-	if (response_len > 0)
-	{
+	if (command_len == 0)
 		g_rw = 1;
 
-		// Start I2 master transact.
-		I20CONSET = STA;
-		print("START\n");
+	if ((g_rw == 1) && (response_len == 0))
+		return 0;
 
-	} // response_len > 0
+	I20CONSET = STA;
+
+	while(!g_transact_ended) 
+	{ }
+
 }
 
 
