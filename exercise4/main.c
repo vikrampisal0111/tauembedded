@@ -56,6 +56,8 @@ int main()
 
 	return_code = i2cMasterTransact(0x90, 0, 0, response, 2);
 
+	printNum((int)tempdata_to_celsius((response[0]<<8) + response[1]));
+
 }
 
 
