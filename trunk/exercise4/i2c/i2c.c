@@ -49,6 +49,8 @@
 		return -1;                   \
 	}
 
+typedef void (*completion_handler_t)(void);
+
 // Global data vars
 volatile uint8_t g_slave_address = 0;
 
@@ -64,6 +66,8 @@ volatile int g_recv_count = 0;
 volatile int g_rw = 0;
 
 volatile int g_transact_ended = 0;
+
+volatile completion_handler_t g_completion;
 
 #ifdef USE_FIQ
 void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) 
@@ -118,6 +122,9 @@ void __attribute__ ((interrupt("IRQ"))) viq_9(void)
 				}
 				else {
 					I20CONSET = STO | AA;
+					g_transact_ended = 1;
+					if (g_completion != 0)
+						g_completion();
 				}
 			}
 			else {
@@ -172,6 +179,8 @@ void __attribute__ ((interrupt("IRQ"))) viq_9(void)
 
 			I20CONSET = STO | AA;
 			g_transact_ended = 1;
+			if (g_completion != 0)
+				g_completion();
 			break;
 
 		case STAT_BUS_ERR:
@@ -211,6 +220,7 @@ void i2cInit()
 }
 
 
+
 /*
 Write a command to a slave with a given slave address and read a response from it.
 If the length of the response buffer is zero the function does not read from the slave at all.
@@ -221,6 +231,7 @@ This function is blocking
 @param command_len length of the command
 @param response the response received from the slave
 @param response_len length of the response
+@param onComplete completion hander for asynchronuous work
 
 @return the number of bytes read from the slave or 
 		if the transaction fails the function returns 
@@ -230,7 +241,8 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 						  uint8_t *command,
 						  int32_t command_len,
 						  uint8_t *response,
-						  int32_t response_len) 
+						  int32_t response_len,
+			completion_handler_t onComplete) 
 {
 	I20CONCLR = (STA | SI | AA);
 	print("Enabled I2C\n");
@@ -257,12 +269,12 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 	if ((g_rw == 1) && (response_len == 0))
 		return 0;
 
+	g_completion = onComplete;
+
 	print("Start I2C0\n");
 	printNum(g_rw);
 	I20CONSET = STA;
 
-	while(!g_transact_ended) 
-	{ }
 
 }
 
