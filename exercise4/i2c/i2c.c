@@ -239,8 +239,16 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 	g_response = response;
 	g_response_len = response_len;
 
-	if (command_len == 0)
+	g_trans_count = 0;
+	g_recv_count = 0;
+
+	g_rw = 0;
+
+	g_transact_ended = 0;
+
+	if (command_len == 0) {
 		g_rw = 1;
+	}
 
 	if ((g_rw == 1) && (response_len == 0))
 		return 0;
