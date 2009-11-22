@@ -65,17 +65,20 @@ volatile int g_rw = 0;
 
 volatile int g_transact_ended = 0;
 
-void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
-	
+#ifdef USE_FIQ
+void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) 
+#endif
+void __attribute__ ((interrupt("IRQ"))) viq_9(void)
+{
 	uint8_t status = I20STAT;
-        print("in fiq\n");	
+        print("in irq\n");	
 	switch(status) {
 		case STAT_START:
 			// Input slave address and R!W
 			I20DAT = g_slave_address | g_rw;
 #ifdef DEBUG
-			print("Writing slave address for write op");
-			printHex(g_slave_address, 4);
+			print("Writing slave address + r!w\n");
+			printHex(g_slave_address | g_rw, 4);
 			print("\n");
 #endif			
 			I20CONSET = AA;
@@ -182,6 +185,7 @@ void __attribute__ ((interrupt("FIQ"))) fiq_isr(void) {
 
 	// Clear the SI bit
 	I20CONCLR = SI;
+	vicUpdatePriority();
 }
 
 /*
@@ -253,6 +257,8 @@ int32_t i2cMasterTransact(uint8_t slave_address,
 	if ((g_rw == 1) && (response_len == 0))
 		return 0;
 
+	print("Start I2C0\n");
+	printNum(g_rw);
 	I20CONSET = STA;
 
 	while(!g_transact_ended) 

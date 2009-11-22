@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 
+#if 0
 typedef void (*interrupt_handler_t)(void); 
 
 #if    defined(LPC2119)
@@ -81,7 +82,7 @@ typedef enum {
 // update the priority hardware
                         
 #define interruptUpdatePriority() (VICVectAddr=0xff)
-
+#endif
 #define disable_interrupts()											\
   asm volatile (															\
 		"STMDB	SP!, {R0}		\n\t"	/* Push R0.						*/	\

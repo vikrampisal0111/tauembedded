@@ -14,7 +14,7 @@ ASRC = startup.S
 #  -Wall...:     warning level
 #  -Wa,...:      tell GCC to pass this to the assembler.
 #    -adhlns...: create assembler listing
-CFLAGS = -I.
+CFLAGS = -DLPC2148 -I.
 CFLAGS += -mcpu=arm7tdmi
 CFLAGS += -gdwarf-2
 CFLAGS += $(CDEFS) $(CINCS)
