@@ -12,11 +12,37 @@ Michael Gendelman 304332018
  The rest of the driver we implemented according to the MCU documentation, we used polling on the SI bit and enabled
  the IRQ that handles the interrupt, we check the status after each SI clearing and implemented the read/write features.
 
-3. We tried to test the driver for reading 2 bytes from the peripheral however we have bugs and we receive the SLA+R!W back on the bus.
-It is possible that we need to clear the START bit.
+3. We implemented the driver using an IRQ interrupt:
+ The invocation method sets the required operation in global volatile variables.
+ Then it starts the controller by setting the START bit in the I20CONSET register.
+ As a result the IRQ is being called and it drives the operation from there.
+ It handles the request in two batches:
+  1. Write batch, if there is data to be written to the slave device.
+    - After this batch if there is data to be read it contineus to second batch.
+  2. Read batch, if there is data to be read from the slave device.
+ The invocation method itself will exit if there is no read and no write data.
+
+ We tested this function as requested by reading the temperature from the LM75 device,
+  therefore there was no writing but only reading to this operation.
 
 4. We implemented the temperature conversion function using the LM75 document and tested it apart from the driver code.
+ Then using the driver we wrote in section 3 we printed to the UART the temperature.
 
-5. Up to 8 LM75's can serve on one I2C bus. This is because LM75 has 3 address selection bits.
+5. Up to 8 LM75's can serve on one I2C bus. This is because LM75 has 3 address selection bits which are not internally hardwired.
 
-6. TBD.
+6. If we would clock the LM75 too fast (i.e. by setting lower value for the I20SCLL+I20CLH registers on init)
+    the result would be that the clock cycle would be less than 2.5 microseconds which is the minimal possible
+    cycle according to the device hardware spec.
+   The result will be that the device is driven too fast and therefore its circuit logic will not be able
+    to produce the correct calculation in the given time frame of the fast cycle and therefore it will
+    produce some half baked calculation which will be probably identified on the master side as an error in the communication.
+   
+
+7. (a) We imported the lcd driver from exercise 2 and used it to display the temperature on lcd.
+        Furthermore we created a busy loop that redraws the temperature periodically.
+   (c) We added a global variable which holds a pointer to a call-back function intended to be
+        invoked on driver completion event, then we transfer it as an argument to the driver
+	method and the implementation is now the driver user responsibility.
+	The method is not blocking and the user gets notified by the callback when it is done.
+	To test it we still used polling by the driver user but on an external variable which is 
+	modified upon the driver complete event function being called.
