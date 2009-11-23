@@ -12,7 +12,7 @@ Michael Gendelman 304332018
  The rest of the driver we implemented according to the MCU documentation, we used polling on the SI bit and enabled
  the IRQ that handles the interrupt, we check the status after each SI clearing and implemented the read/write features.
 
-3. We tries to test the driver for reading 2 bytes from the peripheral however we have bugs and we receive the SLA+R!W back on the bus.
+3. We tried to test the driver for reading 2 bytes from the peripheral however we have bugs and we receive the SLA+R!W back on the bus.
 It is possible that we need to clear the START bit.
 
 4. We implemented the temperature conversion function using the LM75 document and tested it apart from the driver code.
