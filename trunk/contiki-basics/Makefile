@@ -1,5 +1,5 @@
-CONTIKI_PROJECT = exercise
+CONTIKI_PROJECT = solution
 all: $(CONTIKI_PROJECT)
 
-CONTIKI = /users/courses/embedded/contiki-2.3
+CONTIKI = /home/user/contiki-2.3
 include $(CONTIKI)/Makefile.include
