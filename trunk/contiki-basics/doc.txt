@@ -1,0 +1,34 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Exercise 4 - Report
+---------------------
+
+4. We used two methods:
+ 1. By using PROCESS_WAIT_EVENT_UNTIL()
+ 2. By using a switch on the event and PROCESS_WAIT_EVENT()
+ Both methods worked.
+
+6. We used process_start() to start the new process from within the event handling routine of the
+ first process, and we checked that start does not make it restart if the new process is already
+ running.
+
+7. We used the example to monitor the button press and started this process automatically and used
+ a static counter for printing the number of clicks.
+
+8. We allocated a new event in the first process. then we transferred the event number using the 
+ data void pointer when starting the new process. The same event number is used to post each 
+ time when the timer event occurs and the new process also prints a message.
+
+9. We implemented a call back function which does the following:
+ 1. toggles the blue led.
+ 2. schedules the real time timer again for a second after the last schedule, using RTIME_TIME() macro.
+ Then we initially schedule a new timer performing rtimer_init() and rtimer_set() to run this function 
+ one second later than the current time, using RTIME_NOW() macro. 
+ We used the process from section 8 to initialize the real time timer routine.
+ 
+10. We put a infinite while loop within the event handling of the first process, right after it prints 'Hello!'.
+ Then we ran the program and checked that the watchdog is being called and restarts it periodically.
+ We then took the watchdog.c source file and commented out the start routine so the OS will not start the watchdog.
+ We checked to see that it does not reset the program.
