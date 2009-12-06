@@ -1,0 +1,24 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Contiki Rime - Lab Report
+----------------------------
+
+3. We implemented two new processes that await a post signal to turn off the leds (each one is responsible for a different led).
+ On the receive callback we turn the red led ON then call process_post() with the event to the red led process.
+ On the timer event in the main process we turn the green led ON then call process_post() with the event to the green led process.
+
+4. We tested the range of reception:
+ we walked with one node outside of the lab and we tested that it receives the communication across the wall boundry.
+ we walked a bit outside the class to try and see when it does not receive any more.
+
+6.7. We were not able to get bigger hop number than 4, we walked inside the building trying to communicate to the sink.
+
+8. We changed a differenet channel (virtual) and tested that we can't communicate with others using different channel.
+
+9. We found accoridng to the CC2420 product spec that it enumerates the channels as 11-26 so we used the lower bound channel 11,
+	and we tested that we can't communicate with others using a different physical channel.
+
+
+
