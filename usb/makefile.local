@@ -25,9 +25,9 @@ TARGET = test-char-lcd
 TARGET = test-i2c-lm75
 TARGET = led-timer-pll
 TARGET = power-management
-TARGET = test-usb-serial
 TARGET = test-usb-mouse
 
+TARGET = test-usb-serial
 LDSCRIPT = lpc2148-ram
 LDSCRIPT = lpc2148-flash
 
