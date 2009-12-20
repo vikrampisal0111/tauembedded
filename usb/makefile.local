@@ -1,0 +1,33 @@
+# Sivan Toledo, 2008
+# local makefile with frequently-changing values.
+
+# Change the path to where you installed WinArm
+GCCBIN = c:/Programs/WinARM-20070505/bin
+GCCBIN = c:/Embedded/WinARM/bin
+GCCBIN = /usr/local/bin
+
+# change the port number to that of the USB Serial Port
+# (check under device manager in Windows)
+LPC21ISP_PORT = COM9
+LPC21ISP_PORT = /dev/ttyUSB0
+
+TARGET = led-timer
+TARGET = switch-led
+TARGET = led-timer-ram
+TARGET = blink
+TARGET = blink-slowio-native
+TARGET = blink-timer
+TARGET = blink-timer-isr
+TARGET = isr-led-switch
+TARGET = blink-timer
+TARGET = test-uart-advanced
+TARGET = test-char-lcd
+TARGET = test-i2c-lm75
+TARGET = led-timer-pll
+TARGET = power-management
+TARGET = test-usb-serial
+TARGET = test-usb-mouse
+
+LDSCRIPT = lpc2148-ram
+LDSCRIPT = lpc2148-flash
+
