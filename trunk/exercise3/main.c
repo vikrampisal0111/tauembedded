@@ -44,8 +44,8 @@ void toggle_rgb() {
 
 #define OFF_WAIT_TIME	(MICROSEC/ON_FREQ_HZ)
 
-#define JOYSTICK_LEFT   (((IOPIN0 & BIT16))) //&& (IOPIN0 & BIT19))
-#define JOYSTICK_RIGHT 	(((IOPIN0 & BIT18))) //&& (IOPIN0 & BIT20))
+#define JOYSTICK_LEFT   (((IOPIN0 & BIT17) == 0) && ((IOPIN0 & BIT19) == 0))
+#define JOYSTICK_RIGHT 	(((IOPIN0 & BIT18) == 0) && ((IOPIN0 & BIT20) == 0))
 
 #define IODIR_IN(BITS)  (~(BITS))
 #define IODIR_OUT(BITS)	 (BITS)
@@ -104,13 +104,15 @@ void set_freq_scale(int scale)
 
 void change_freq()
 {
-	if (JOYSTICK_LEFT && freq < ON_FREQ_HZ)
+	if (JOYSTICK_LEFT && (freq < ON_FREQ_HZ))
 	{
+		print("Left\n");
 		inc_freq();
 	}
-	else if (JOYSTICK_RIGHT && freq > OFF_FREQ_HZ)
+	else 
+        if (JOYSTICK_RIGHT && (freq > OFF_FREQ_HZ))
 	{
-		//freq -= FREQ_STEP;
+		print("Right\n");
 		dec_freq();
 	}
 
@@ -124,7 +126,7 @@ void systick_periodic_task()
 {
 	msecs++;
 	
-	if ((msecs & 0x3f) == 0) { // 64 milliseconds
+	if ((msecs & 0xf) == 0) { // 64 milliseconds
 		change_freq();
 	}
 
@@ -150,15 +152,15 @@ int main()
 	IODIR0 |= BIT10;
 
 	uart0Init();
-	systickInit();
 	joystickInit();
 	rgbInit();
+	
 	busywaitInit();
 
 	while(1) {
 		printNum(wait_time);
 		busywait(wait_time);
-		
+		change_freq();
 		if (freq != OFF_FREQ_HZ) {
 			toggle_rgb();
 		}
