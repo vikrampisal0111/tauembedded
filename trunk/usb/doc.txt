@@ -1,0 +1,19 @@
+
+Eyal Widder 064986375
+Michael Gendelman 304332018
+
+ Exercise usb - Report
+-----------------------
+
+5. The device is an echo server. It prints everything it is given on the uart line.
+6. We tried several baud rates and found that 14400 and 28800 are not supported,
+but 2400 and 115200 are supported. 
+7. We changed the function that returns the device descriptor and saw the errors in dmesg.
+8. We implemeted the following protocol:
+      start - starts receiving commands
+      bl-on - turns backlight on
+      bl-off - turns backlight off
+      clear - clears the screen
+      other msg - prints msg string
+10. (a) We changed the mouse report data so that mouse button bit1 is turned on when P0.14 is clicked. 
+The result was that the right mouse button was activated when P0.14 was clicked.
