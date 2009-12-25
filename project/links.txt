@@ -1,0 +1,2 @@
+http://www.standardics.nxp.com/support/documents/microcontrollers/?scope=LPC2000
+http://sourceforge.net/projects/efsl/
