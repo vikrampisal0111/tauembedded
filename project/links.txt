@@ -1,2 +1,11 @@
+
+Useful examples for LPC2148:
 http://www.standardics.nxp.com/support/documents/microcontrollers/?scope=LPC2000
+
+Embedded File System (FAT implementation)
 http://sourceforge.net/projects/efsl/
+
+uIP for LPC2148:
+http://code.google.com/p/lpc-uip/  (GPLv2)
+http://www.braintechnology.de/braintechnology/advb.html (?)
+
