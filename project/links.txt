@@ -9,3 +9,6 @@ uIP for LPC2148:
 http://code.google.com/p/lpc-uip/  (GPLv2)
 http://www.braintechnology.de/braintechnology/advb.html (?)
 
+
+LPC 2148 demo code containing SD driver & uIP 1.0
+http://www.jcwren.com/arm/
