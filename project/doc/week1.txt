@@ -1,0 +1,28 @@
+
+ Advanced Network Storage Device - Progress report : week1 3/1/10
+-----------------------------------------------------------------
+
+The code is in svn: http://tauembedded.googlecode.com/svn/trunk/project/src/trunk/
+
+ Tasks Accomplished
+--------------------
+
+ 1. Working spi driver compatible for mmc commands, not compatible for the ethernet commands.
+ 2. Partial mmc protocol implementation ported to the board and tested (block access).
+ 3. Integrated printf to send text to uart for easy debugging.
+ 4. Ethernet driver for the extension enc28j60, untested. 
+ 5. uIP TCP/IP stack porting.
+ 6. Makefile build system for the application.
+
+ Current Issues
+------------------
+ 1. Both ethernet and mmc use spi1. So we need to test if they work together,
+    In addition maybe use spi0 for one of them.
+
+ 2. The spi driver has a problem communicating with the enc28j60.
+
+ Plan for next week
+--------------------
+
+ 1. Integrate FatFS with the MMC driver.
+ 2. Integrate uIP with the Eth. driver and run the hello-world app.
