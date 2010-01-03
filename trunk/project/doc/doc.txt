@@ -1,0 +1,64 @@
+ 
+
+ Advanced Network Storage Device
+---------------------------------
+
+The device will be based on the LPC2148 with the Ethernet extension.
+
+     LPC2148
+     +------------------+
+     |   Web Server     |
+     |      -----       |
+     | FatFS  | uIP     |
+     |	    -----       |                     ----------
+     | SD Drv | Eth Drv |-----Ethernet--------| Router |
+     +------------------+                     ----------
+          |                                      |
+          |                          -----------------
+          -----------USB-------------| Host Computer |
+                                     -----------------
+
+  1.  Choose an application level protocol for the interface:
+         There are several options here:
+           1. Find a lightweight implementation to port to LPC2148.
+           2. Choose a protocol and partially implement it to get the needed functionality. 
+              Here we can map the needed protocol feature by tracing requests/responses of the protocol.
+           3. Use uIP and Web Server from uIP examples.
+                The device is supposed to act as a standalone ethernet device, thus, 
+                it should have an IP address which can be either static ot dynamic:
+                  1. Static IP: A USB configuration interface will be needed in order to set the IP.
+                  2. Dynamic IP: A DHCP client should be implemented in order to dynmically get an IP from a DHCP server.
+   2. SD/MMC implementation:
+         1. Find a low level driver to the SPI-SD interface and port it to LPC2148 SPI.
+         2. Write a low level driver to the SPI-SD interface
+               To do this we will need to read the Simplified SD specification and
+               the description of the SD interface on LPC.
+         3. Create a filesystem which will use the low level driver.
+	       1. A very lightweight Fat32 implemetation called FatFS was found. 
+                  FatFS is independant of the low level driver, however, before using it on the board 
+                  we would like to write a ramdisk driver to evaluate how it works.
+               2. Integrate FatFS with our SD driver.  
+	       3. In order to support file creation, modification time need to get system time on LPC and integrate it with FatFS.
+   3. Integration of SD/MMC & web server:
+         1. Check where the web server code is using files and replace the calls with our FS API:
+               1. Mount
+               2. Open
+               3. Read
+               4. Write
+               5. Etc
+   4. USB device configuration interface:
+	In order to control the device independently of the ethernet connection we need a simple USB configuration protocol.
+        The following options are available: 
+           1. Implement a control protocol over the serial port.
+           2. Implement simple UI application that initiates the specified commands:
+                1. Change Root folder - Change the root of the web server on the card.
+                2. Change IP - 
+                     Static IP - Manually change the IP.
+                     Dynamic IP - Renew IP by issuing a DHCP request.
+               4. Upload/Download a file.
+               5. Change device write mode: Read Only or Read/Write.
+               6. Show usage statistics (downloaded files, by who, latency measurements).
+               7. Extra: USB mass storage mode - Access the SD card directly, like in SD card readers.
+
+ 
+
