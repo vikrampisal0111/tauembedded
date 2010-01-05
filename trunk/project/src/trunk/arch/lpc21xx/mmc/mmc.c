@@ -1,5 +1,7 @@
-#include "basic_types.h"
+#include "type.h"
+#include "../spi/spi.h"
 #include "mmc.h"
+#include "io.h"
 
 BYTE MMCWRData[MMC_DATA_SIZE]; 
 BYTE MMCRDData[MMC_DATA_SIZE]; 
