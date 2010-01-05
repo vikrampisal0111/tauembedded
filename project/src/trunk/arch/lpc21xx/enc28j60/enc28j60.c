@@ -43,7 +43,7 @@ www.braintechnology.de
 //#include <uip/timer.h>
 
 //#include "peripherals.h"
-
+#include <stdio.h>
 #include "type.h"
 #include "trace.h"
 #include "lpc214x.h"
@@ -55,7 +55,7 @@ uint8_t Enc28j60Bank;
 uint16_t NextPacketPtr;
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
-#define CS_ETHERNET    7
+#define CS_ETHERNET    20
 #define RESET_ETHERNET    11
 #define INTR_ETHERNET	15
 
@@ -207,9 +207,10 @@ void enc28j60_phy_write(uint8_t address, uint16_t data)
     // write the PHY data
     enc28j60_write(MIWRL, data);
     enc28j60_write(MIWRH, data>>8);
-
+printf("wait phy write\n");
     // wait until the PHY write completes
     while(enc28j60_read(MISTAT) & MISTAT_BUSY);
+printf("wait phy write complete\n");
 }
 
 void enc28j60_init(void)
@@ -218,13 +219,19 @@ void enc28j60_init(void)
     unsigned char i;
     /* Ethernet CS*/
     ETH_CTRLOR_CS_INIT();
+    printf("CD_INIT\n");
     ETH_CTRLOR_RESET_INIT();
+    printf("RESET_INIT\n");
     ETH_CTRLOR_INT_INIT();
+    printf("INT_INIT\n");
     ETH_CTRLOR_SPI_INIT();
+    printf("SPI_INIT\n");
 
 
     ETH_CTRLOR_RESET_HIGH();
+    printf("Reset_High\n");
     ETH_CTRLOR_CS_HIGH();
+    printf("CS_High\n"); 
 
     // RESET the entire ENC28J60, clearing all registers
     // Also wait for CLKRDY to become set.
@@ -233,12 +240,13 @@ void enc28j60_init(void)
     // connection.  This loop makes sure that we can communicate with the
     // ENC28J60 before proceeding.
 
-    TRACE("\r\nPOR DELAY");
+   // printf("\r\nPOR DELAY");
     for(timeout=0;timeout<1000000;timeout++);
     for(timeout=0;timeout<1000000;timeout++);
     for(timeout=0;timeout<1000000;timeout++);
     for(timeout=0;timeout<1000000;timeout++);
     for(timeout=0;timeout<1000000;timeout++);
+printf("after timeouts\n");
 #if 0
     // perform system reset
     enc28j60_write_op(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
@@ -277,8 +285,8 @@ void enc28j60_init(void)
 	for(timeout=0;timeout<1000000;timeout++);
 	i=(enc28j60_read(ESTAT) & ESTAT_CLKRDY);
     }while((i & 0x08) || (~i & ESTAT_CLKRDY));
-    TRACE("enc28j60 READY");
-
+    printf("enc28j60 READY");
+    fflush(stdout);
     //        }while(timeout > 100000);
     // do bank 0 stuff
     // initialize receive buffer
@@ -286,10 +294,18 @@ void enc28j60_init(void)
     // set receive buffer start address
     NextPacketPtr = RXSTART_INIT;
     enc28j60_write(ERXSTL, RXSTART_INIT&0xFF);
+    printf("enc28j60_write(ERXSTL, RXSTART_INIT&0xFF);\n");
+
     enc28j60_write(ERXSTH, RXSTART_INIT>>8);
+    printf("enc28j60_write(ERXSTH, RXSTART_INIT>>8);\n");
+
     // set receive pointer address
     enc28j60_write(ERXRDPTL, RXSTART_INIT&0xFF);
+    printf("enc28j60_write(ERXRDPTL, RXSTART_INIT&0xFF);\n");
+
     enc28j60_write(ERXRDPTH, RXSTART_INIT>>8);
+    printf("enc28j60_write(ERXRDPTH, RXSTART_INIT>>8);\n");
+
     //	// set receive buffer end
     enc28j60_write(ERXNDL, RXSTOP_INIT&0xFF);
     enc28j60_write(ERXNDH, RXSTOP_INIT>>8);
@@ -310,11 +326,12 @@ void enc28j60_init(void)
     // Allow infinite deferals if the medium is continuously busy 
     // (do not time out a transmission if the half duplex medium is 
     // completely saturated with other people's data)
-
+    printf("before defer\n");
     // Allow infinite deferals if the medium is continuously busy 
     // (do not time out a transmission if the half duplex medium is 
     // completely saturated with other people's data)
     enc28j60_write(MACON2, MACON4_DEFER);
+    printf("After defer\n");
     // Late collisions occur beyond 63+8 bytes (8 bytes for preamble/start of frame delimiter)
     // 55 is all that is needed for IEEE 802.3, but ENC28J60 B5 errata for improper link pulse 
     // collisions will occur less often with a larger number.
@@ -331,17 +348,23 @@ void enc28j60_init(void)
     //write MAC address
     //NOTE: MAC address in ENC28J60 is byte-backward
     //set Mac Addr.
-
+    printf("Before mac set\n");
 {
     uint8_t mymac[6] = {0x00,0x04,0x0e,0xf8,0xb7,0xf6};
     enc28j60_set_mac_address(mymac);
 }
+    printf("After mac set\n");
 // Disable the CLKOUT output to reduce EMI generation
 enc28j60_write(ECOCON, 0x00);	// Output off (0V)
+
+printf("before phy write\n");
+fflush(stdout);
 // no loopback of transmitted frames
 enc28j60_phy_write(PHCON2, PHCON2_HDLDIS);
 
 
+printf("Before if 1\n");
+fflush(stdout);
 #if 1
 {
     int i;
@@ -362,7 +385,8 @@ enc28j60_phy_write(PHCON2, PHCON2_HDLDIS);
     }
 }
 #endif
-
+printf("After if 1\n");
+fflush(stdout);
 enc28j60_phy_write(PHLCON, 0x472);//Display link status and transmit/receive activity (always stretched)
 //enc28j60_phy_write(PHLCON1, 0x0000);//Display link status and transmit/receive activity (always stretched)
 //        // enable interrutps

@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include "io.h"
 
-#define CLOCKS_PCLK 3000000
+#define CLOCKS_PCLK 6000000
 #define UART0_BAUD_RATE 19200
 
 void uart0Init();

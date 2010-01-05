@@ -12,7 +12,8 @@ export STARTEDATTOP=true
 #
 #export LPC2148_OPTS=-D CFG_UART -D CFG_SPI -D CFG_LCD -D CFG_FATFS -D CFG_UIP
 
-SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/lcd arch/lpc21xx/clock arch/lpc21xx/enc28j60 arch/lpc21xx/spi arch/lpc21xx/timer uip lib apps/hello-world
+SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/lcd arch/lpc21xx/clock arch/lpc21xx/enc28j60 arch/lpc21xx/spi #arch/lpc21xx/timer arch/lpc21xx/mmc uip lib apps/hello-world
+#TARGET = hello-world
 TARGET = main
 
 SRC = $(TARGET).c syscalls.c
