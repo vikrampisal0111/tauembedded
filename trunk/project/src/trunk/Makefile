@@ -11,9 +11,9 @@ export STARTEDATTOP=true
 #  -D CFG_UIP           Enable uIP w/ ENC28J60 on SPI0
 #
 #export LPC2148_OPTS=-D CFG_UART -D CFG_SPI -D CFG_LCD -D CFG_FATFS -D CFG_UIP
+LPC2148_OPTS=-DUART0_DEBUG
 
-SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/lcd arch/lpc21xx/clock arch/lpc21xx/enc28j60 arch/lpc21xx/spi #arch/lpc21xx/timer arch/lpc21xx/mmc uip lib apps/hello-world
-#TARGET = hello-world
+SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/enc28j60 arch/lpc21xx/spi_eth lib #arch/lpc21xx/lcd arch/lpc21xx/clock #arch/lpc21xx/timer arch/lpc21xx/mmc uip apps/hello-world
 TARGET = main
 
 SRC = $(TARGET).c syscalls.c
@@ -31,7 +31,7 @@ export ELFSIZE=arm-elf-size
 export ROOT=$(shell pwd)
 export COMMON=$(ROOT)/common
 
-INCLUDES = -I$(ROOT)/arch/lpc21xx/uart -I$(ROOT)/arch/lpc21xx/lcd -I$(ROOT)/uip -I$(ROOT)/arch/lpc21xx/enc28j60 -I$(ROOT)/arch/lpc21xx/clock -I$(ROOT)/arch/lpc21xx/timer
+INCLUDES = -I$(ROOT)/lib -I$(ROOT)/arch/lpc21xx/spi_eth -I$(ROOT)/arch/lpc21xx/uart -I$(ROOT)/arch/lpc21xx/lcd -I$(ROOT)/uip -I$(ROOT)/arch/lpc21xx/enc28j60 -I$(ROOT)/arch/lpc21xx/clock -I$(ROOT)/arch/lpc21xx/timer
 
 export BASEINCLUDE=-I$(ROOT) -I$(ROOT)/include
 
@@ -104,7 +104,7 @@ $(SUBDIRS):
 # verbose output:
 # LPC21ISP_DEBUG = -debug
 LPC21ISP = lpc21isp
-LPC21ISP_BAUD = 19200 
+LPC21ISP_BAUD = 19200
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
 LPC21ISP_PORT = /dev/ttyUSB0
@@ -157,6 +157,7 @@ clean :
 	find . -name \*.o -exec rm -f {} \;
 	find . -name .depend -exec rm -f {} \;
 	rm -f *.map *.lst *.elf *.hex .depend sizes.csv tags
+	rm $(COMMON)/common.a
 
 ifeq (.depend,$(wildcard .depend))
 include .depend

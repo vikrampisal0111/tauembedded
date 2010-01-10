@@ -8,20 +8,42 @@
 #include "type.h"
 #include "spi.h"
 
+/* SPI Status register */
+#define SSPSR_TFE	1 << 0
+#define SSPSR_TNF	1 << 1
+#define SSPSR_RNE	1 << 2
+#define SSPSR_RFF	1 << 3
+#define SSPSR_BSY	1 << 4
+
 void SPI_Init( void )
 {
     DWORD portConfig;
     BYTE i, Dummy;
-    /* Configure PIN connect block */
-    /* bit 32, 54, 76 are 0x10, bit 98 are 0x00
-       port 0 bits 17, 18, 19, 20 are SSP port SCK1, MISO1, MOSI1,
-       and SSEL1 set SSEL to GPIO pin that you will have the totoal
-       freedom to set/reset the SPI chip-select pin */
+
     SSPCR1 = 0x00; /* SSP master (off) in normal mode */
-    portConfig = PINSEL1;
-    PINSEL1 = portConfig | 0x00A8;
-    IODIR0 = SPI_SEL; /* SSEL is output */
-    IOSET0 = SPI_SEL; /* set SSEL to high */
+
+    //portConfig = PINSEL1;
+    //PINSEL1 = portConfig | 0x00A8;
+    //IODIR0 = SPI_SEL; /* SSEL is output */
+    //IOSET0 = SPI_SEL; /* set SSEL to high */
+
+    // Select pins
+#define CS_SEL	    BIT26|BIT27
+#define SCK_SEL	    BIT3
+#define MOSI_SEL    BIT7
+#define MISO_SEL    BIT5
+    PINSEL0 &= ~CS_SEL;
+    PINSEL1 |= SCK_SEL | MISO_SEL | MOSI_SEL;
+
+    // Select pin directions
+    IODIR0 |= BIT17 | BIT19;
+    IODIR0 &= ~BIT18;
+
+    // ENC28J60 ETH_CS is P0.13. Set CS to high
+    IOSET0 = BIT13;
+
+    PCONP |= BIT10;
+
     /* Set PCLK 1/2 of CCLK */
     VPBDIV = 0x02;
     /* Set data to 8-bit, Frame format SPI, CPOL = 0, CPHA = 0,
@@ -36,6 +58,7 @@ void SPI_Init( void )
     {
         Dummy = SSPDR; /* clear the RxFIFO */
     }
+
     return;
 }
 
@@ -50,11 +73,12 @@ void SPI_Send( BYTE *buf, DWORD Length )
         return;
     while ( Length != 0 )
     {
+
         /* as long as TNF bit is set, TxFIFO is not full, I can write */
-        while ( !(SSPSR & 0x02) );
+        while ( !(SSPSR & SSPSR_TNF) );
         SSPDR = *buf;
         /* Wait until the Busy bit is cleared */
-        while ( !(SSPSR & 0x04) );
+        while ( !(SSPSR & SSPSR_BSY) );
         Dummy = SSPDR; /* Flush the RxFIFO */
         Length--;
         buf++;
@@ -68,7 +92,7 @@ uint8_t SPI_TxRx(uint8_t out)
     
     SSPDR = out;
    
-    while (!(SSPSR & 0x10));
+    while (!(SSPSR & SSPSR_BSY));
    
      in = SSPDR;
     if (in != -1) {

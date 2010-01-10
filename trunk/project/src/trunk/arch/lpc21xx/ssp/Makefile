@@ -1,4 +1,4 @@
-SRC_FILES=memb.c busywait.c
+SRC_FILES=ssp.c irq.c
 
 #
 # Define all object files.

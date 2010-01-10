@@ -329,6 +329,7 @@ void enc28j60_Init(void);
   void enc28j60_init(void);
 void enc28j60_get_mac_address(uint8_t *macaddr);
 
+void enc28j60_set_mac_address(uint8_t *macaddr);
 
 #endif
 
