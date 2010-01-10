@@ -5,8 +5,8 @@
         #include <stdio.h>
         #define TRACE(X ,reg...)   \
                 do {	           \
-                printf("\r\n");    \
                 printf(X, ##reg);  \
+                printf("\n");      \
                 } while(0)
 
         #define trace(X ,reg...)     \

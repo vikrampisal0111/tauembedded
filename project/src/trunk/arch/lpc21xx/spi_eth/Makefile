@@ -1,4 +1,12 @@
-SRC_FILES=memb.c busywait.c
+#
+#  $Id: Makefile 338 2008-11-10 04:15:26Z jcw $
+#  $Revision: 338 $
+#  $Author: jcw $
+#  $Date: 2008-11-09 23:15:26 -0500 (Sun, 09 Nov 2008) $
+#  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/spi/Makefile $
+#
+
+SRC_FILES=spi.c
 
 #
 # Define all object files.
