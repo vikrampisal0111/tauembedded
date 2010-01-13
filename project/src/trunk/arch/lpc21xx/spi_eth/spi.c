@@ -211,11 +211,3 @@ uint8_t spiPut (uint8_t valueIn)
     return res;
 }
 
-uint8_t spiGet()
-{
-    uint8_t res;
-    //while (!(S0SPSR & SPI_SPSR_SPIF));
-    res = S0SPDR;
-    TRACE("res=%x", res);
-    return res;
-}
