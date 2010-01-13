@@ -187,7 +187,7 @@ void spiInit (void)
     //
     //  SCK0 = (PCLK = (CCLK/APB)) / 8 will be 6Mhz (putt putt putt...)
     //
-    S0SPCCR = 8;
+    S0SPCCR = 7;
 }
 
 #define SPI_SPSR_ABRT         ((unsigned int) 0x00000008)
@@ -208,5 +208,14 @@ uint8_t spiPut (uint8_t valueIn)
     res = S0SPDR;
 
     TRACE("%x <--> %x", valueIn, res);
+    return res;
+}
+
+uint8_t spiGet()
+{
+    uint8_t res;
+    //while (!(S0SPSR & SPI_SPSR_SPIF));
+    res = S0SPDR;
+    TRACE("res=%x", res);
     return res;
 }
