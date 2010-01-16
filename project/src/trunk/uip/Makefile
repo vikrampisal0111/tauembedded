@@ -1,5 +1,5 @@
 #SRC_FILES=psock.c uip.c uip-fw.c uip-neighbor.c uip_timer.c uiplib.c uip_arch.c uip_arp.c 
-SRC_FILES=psock.c uip.c uip-fw.c uip-neighbor.c uiplib.c uip_arp.c 
+SRC_FILES=psock.c uip.c uip-fw.c uip-neighbor.c uiplib.c uip_arp.c timer.c 
 
 #
 # Define all object files.

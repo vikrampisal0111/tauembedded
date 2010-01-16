@@ -1,5 +1,5 @@
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef __TIMER_ARCH_H__
+#define __TIMER_ARCH_H__
 
 void timer0Init();
 
