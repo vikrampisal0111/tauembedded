@@ -207,7 +207,7 @@ uint8_t spiPut (uint8_t valueIn)
     while (!(S0SPSR & SPI_SPSR_SPIF));
     res = S0SPDR;
 
-    TRACE("%x <--> %x", valueIn, res);
+    //TRACE("%x <--> %x", valueIn, res);
     return res;
 }
 
