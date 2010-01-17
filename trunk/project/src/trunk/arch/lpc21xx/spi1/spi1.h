@@ -1,6 +1,8 @@
 #ifndef _SPI_H_
 #define _SPI_H_
 
+#include <type.h>
+
 /* SPI select pin */ 
 #define SPI_SEL      (1 << 11) 
 
