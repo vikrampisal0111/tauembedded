@@ -17,11 +17,11 @@ SUBDIRS += arch/lpc21xx/spi_eth
 SUBDIRS += arch/lpc21xx/timer 
 SUBDIRS += arch/lpc21xx/clock 
 SUBDIRS += arch/lpc21xx/mmc
-
+SUBDIRS += arch/lpc21xx/spi1
 #SUBDIRS += apps/hello-world
-SUBDIRS += apps/simple
+#SUBDIRS += apps/simple
 
-TARGET = main
+TARGET = mmc_test
 
 SRC = $(TARGET).c syscalls.c
 
@@ -38,15 +38,17 @@ export ELFSIZE=arm-elf-size
 export ROOT=$(shell pwd)
 export COMMON=$(ROOT)/common
 
-INCLUDES = 
+INCLUDES = -I/usr/include
 
 INCLUDES += -I$(ROOT)/lib 
 INCLUDES += -I$(ROOT)/uip 
 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/spi_eth 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/uart 
-INCLUDES += -I$(ROOT)/arch/lpc21xx/lcd 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/enc28j60 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/lcd 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/mmc 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/spi1 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/clock 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
@@ -95,7 +97,7 @@ export LDFLAGS
 ASFLAGS = -I. -x assembler-with-cpp
 ASFLAGS += -mcpu=arm7tdmi
 ASFLAGS += $(ADEFS) 
-ASFLAGS += -Wa,--gdwarf-2
+ASFLAGS += -Wall -gdwarf-2
 
 # Define all listing files.
 #LST = $(ASRC:.S=.lst) $(SRC:.c=.lst) 
