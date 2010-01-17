@@ -20,6 +20,8 @@ int main(void) {
 	printf("MMC Init success!\n");
   else
 	printf("MMC Init failure!\n");
+
+printf("%d",	mmc_get_csd());
   
   //setup write data.
   for (i = 0; i < 512; i++)
@@ -45,6 +47,8 @@ int main(void) {
 	if ((i+1)%32 ==0)
 		printf("\n");
   }
+
+  printf("CSD - block size = %d\n", mmc_card_capacity());
   
   if (testok)
 	printf("Test passed!\n");

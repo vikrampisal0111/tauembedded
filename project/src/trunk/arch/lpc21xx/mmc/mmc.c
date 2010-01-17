@@ -6,6 +6,7 @@
 BYTE MMCWRData[MMC_DATA_SIZE]; 
 BYTE MMCRDData[MMC_DATA_SIZE]; 
 BYTE MMCCmd[MMC_CMD_SIZE]; 
+BYTE MMCCSD[16];
 BYTE MMCStatus = 0; 
 
 /************************** MMC Init *********************************/ 
@@ -115,7 +116,10 @@ int mmc_init()
  
   IOSET0 = SPI_SEL;    /* set SPI SSEL */ 
   SSP_SendRecvByteByte(); 
-  return 0; 
+  
+
+  // Finish initialization with get_csd() command.
+  return mmc_get_csd(); 
 } 
  
 /************************** MMC Write Block ***************************/ 
@@ -304,5 +308,66 @@ int mmc_wait_for_write_finish( void )
       return 1;     /* Failure, loop was exited due to timeout */ 
   else 
     return 0;      /* Normal, loop was exited before timeout */ 
-} 
+}
+
+/** Read and store the inserted media card CSD register.
+*/ 
+int mmc_get_csd() 
+{ 
+  int i;
+  WORD varl, varh; 
+  DWORD count = 0xffff;
+  BYTE Status; 
+  BYTE result;
  
+  IOCLR0 = SPI_SEL; /* clear SPI SSEL */ 
+    
+  /* send mmc CMD9(CSD_SEND) to make the card send CSD Register */ 
+  MMCCmd[0] = 0x49; 
+  MMCCmd[1] = 0x00; 
+  MMCCmd[2] = 0x00; 
+  MMCCmd[3] = 0x00; 
+  MMCCmd[4] = 0x00; 
+  MMCCmd[5] = 0xFF; 
+  SPI_Send(MMCCmd, MMC_CMD_SIZE ); 
+   
+  /* if mmc_response returns 1 then we failed to get a 0x00 response */ 
+  if((mmc_response(0x00))==1) 
+  {  
+    MMCStatus = WRITE_BLOCK_TIMEOUT; 
+    IOSET0 = SPI_SEL;    /* set SPI SSEL */ 
+   return MMCStatus; 
+  } 
+
+  result = 0xff;
+  while ((result != 0xfe) && count)
+  {
+	result = SSP_SendRecvByteByte();
+  }
+
+  if (count == 0)
+     return 1;
+
+// Store CSD.
+  for (int i = 0; i < 16; i++)
+  {
+	result = SSP_SendRecvByteByte();
+        MMCCSD[i] = result;
+  }
+ 
+  return 0; 
+}
+
+/** Retrieve the card capacity 
+*/
+DWORD mmc_card_capacity()
+{
+   DWORD mult = (((MMCCSD[9] & 0x3) << 1) + ((MMCCSD[10] & 0x80) >> 7));
+   DWORD c_size = (((MMCCSD[6] & 0x3) << 10) + (MMCCSD[7] << 2) + 
+     ((MMCCSD[8] & 0xc0) >> 6));
+
+   return ((1 << (mult+2))*512) * (c_size+1);
+	
+}
+
+
