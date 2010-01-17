@@ -1,5 +1,4 @@
-#include "basic_types.h"
-#include "spi.h"
+#include "spi1.h"
 
 /* 
  *  SPI and MMC commands related modules. 
