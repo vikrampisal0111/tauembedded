@@ -6,9 +6,9 @@
 #include "spi1.h"
 #include "mmc.h"
 
+extern BYTE MMCWRData[MMC_DATA_SIZE];
+extern BYTE MMCRDData[MMC_DATA_SIZE];
 
-extern BYTE* MMCWRData; 
-extern BYTE* MMCRDData; 
 
 int main(void) { 
   int i;
