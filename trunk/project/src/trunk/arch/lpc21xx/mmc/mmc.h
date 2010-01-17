@@ -27,6 +27,6 @@ int mmc_response(BYTE response);
 int mmc_read_block(WORD block_number); 
 int mmc_write_block(WORD block_number); 
 int mmc_wait_for_write_finish(void); 
-
+int mmc_get_csd();
 
 #endif //_MMC_H_
