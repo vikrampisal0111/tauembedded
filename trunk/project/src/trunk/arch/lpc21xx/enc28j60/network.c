@@ -31,23 +31,19 @@
 #include "network.h"
 #include "enc28j60.h"
 
-/*---------------------------------------------------------------------------*/
-void 
-network_init(void)
+void network_init(void)
 {
-	enc28j60_init();
+    enc28j60_init();
 }
 
-/*---------------------------------------------------------------------------*/
-unsigned int
-network_read(void *pPacket)
+
+unsigned int network_read(void *pPacket)
 {
-	return enc28j60_packet_receive(1500,pPacket);
+    return enc28j60_packet_receive(1500, pPacket);
 }
-/*---------------------------------------------------------------------------*/
-void
-network_send(void *pPacket, unsigned int size)
+
+
+void network_send(void *pPacket, unsigned int size)
 {
-	enc28j60_packet_send(size,pPacket);
+    enc28j60_packet_send(size, pPacket);
 }
-/*---------------------------------------------------------------------------*/
