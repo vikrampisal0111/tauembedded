@@ -526,8 +526,8 @@ void enc28j60_packet_send(uint32_t len, uint8_t *packet)
     //BFCReg(EIR, EIR_TXERIF | EIR_TXIF);
 
     // Set the write pointer to start of transmit buffer area
-    enc28j60_write(EWRPTL, (unsigned char  )TXSTART_INIT);
-    enc28j60_write(EWRPTH, TXSTART_INIT>>8);
+    enc28j60_write16(EWRPTL, (unsigned char  )TXSTART_INIT);
+    //enc28j60_write(EWRPTH, TXSTART_INIT>>8);
 
     // Set the TXND pointer to correspond to the packet size given
     enc28j60_write(ETXNDL, (TXSTART_INIT+len));
@@ -553,8 +553,8 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 	return 0;
 
     // Set the read pointer to the start of the received packet
-    enc28j60_write(ERDPTL, (NextPacketPtr));
-    enc28j60_write(ERDPTH, (NextPacketPtr)>>8);
+    enc28j60_write16(ERDPTL, NextPacketPtr);
+    //enc28j60_write(ERDPTH, (NextPacketPtr)>>8);
 
     // read the next packet pointer
     NextPacketPtr  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
@@ -577,26 +577,25 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 
     // Move the RX read pointer to the start of the next received packet
     // This frees the memory we just read out
-    enc28j60_write(ERXRDPTL, (NextPacketPtr));
-    enc28j60_write(ERXRDPTH, (NextPacketPtr)>>8);
+    enc28j60_write16(ERXRDPTL, (NextPacketPtr));
+    //enc28j60_write(ERXRDPTH, (NextPacketPtr)>>8);
 
     // Errata workaround #13. Make sure ERXRDPT is odd
-
     {
 	uint16_t rs,re;
 	rs = enc28j60_read(ERXSTH);
 	rs <<= 8;
 	rs |= enc28j60_read(ERXSTL);
+
 	re = enc28j60_read(ERXNDH);
 	re <<= 8;
 	re |= enc28j60_read(ERXNDL);
-	if (NextPacketPtr - 1 < rs || NextPacketPtr - 1 > re)
-	{
+
+	if (NextPacketPtr - 1 < rs || NextPacketPtr - 1 > re) {
 	    enc28j60_write(ERXRDPTL, (re));
 	    enc28j60_write(ERXRDPTH, (re)>>8);
 	}
-	else
-	{
+	else {
 	    enc28j60_write(ERXRDPTL, (NextPacketPtr-1));
 	    enc28j60_write(ERXRDPTH, (NextPacketPtr-1)>>8);
 	}
@@ -610,88 +609,87 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 }
 
 
-#ifdef trace
-void enc28j60_reg_dump(void){
+#ifdef TRACE
+void enc28j60_reg_dump(void) {
 
-    trace("\r\nRevID: 0x%x\r\n", enc28j60_read(EREVID));
+    TRACE("\r\nRevID: 0x%x\r\n", enc28j60_read(EREVID));
 
-    trace ( ("\r\nCntrl: ECON1 ECON2 ESTAT  EIR  EIE\r\n"));
-    trace ( ("         "));
-    trace("%02x",enc28j60_read(ECON1));
-    trace( ("    "));
-    trace("%02x",enc28j60_read(ECON2));
-    trace( ("    "));
-    trace("%02x",enc28j60_read(ESTAT));
-    trace( ("    "));
-    trace("%02x",enc28j60_read(EIR));
-    trace( ("   "));
-    trace("%02x",enc28j60_read(EIE));
-    trace( ("\r\n"));
+    TRACE ( ("\r\nCntrl: ECON1 ECON2 ESTAT  EIR  EIE\r\n"));
+    TRACE ( ("         "));
+    TRACE("%02x",enc28j60_read(ECON1));
+    TRACE( ("    "));
+    TRACE("%02x",enc28j60_read(ECON2));
+    TRACE( ("    "));
+    TRACE("%02x",enc28j60_read(ESTAT));
+    TRACE( ("    "));
+    TRACE("%02x",enc28j60_read(EIR));
+    TRACE( ("   "));
+    TRACE("%02x",enc28j60_read(EIE));
+    TRACE( ("\r\n"));
 
-    trace( ("\r\nMAC  : MACON1  MACON2  MACON3  MACON4  MAC-Address\r\n"));
-    trace( ("        0x"));
-    trace("%02x",enc28j60_read(MACON1));
-    trace( ("    0x"));
-    trace("%02x",enc28j60_read(MACON2));
-    trace( ("    0x"));
-    trace("%02x",enc28j60_read(MACON3));
-    trace( ("    0x"));
-    trace("%02x",enc28j60_read(MACON4));
-    trace( ("   "));
-    trace("%02x",enc28j60_read(MAADR5));
-    trace("%02x",enc28j60_read(MAADR4));
-    trace("%02x",enc28j60_read(MAADR3));
-    trace("%02x",enc28j60_read(MAADR2));
-    trace("%02x",enc28j60_read(MAADR1));
-    trace("%02x",enc28j60_read(MAADR0));
-    trace( ("\r\n"));
+    TRACE( ("\r\nMAC  : MACON1  MACON2  MACON3  MACON4  MAC-Address\r\n"));
+    TRACE( ("        0x"));
+    TRACE("%02x",enc28j60_read(MACON1));
+    TRACE( ("    0x"));
+    TRACE("%02x",enc28j60_read(MACON2));
+    TRACE( ("    0x"));
+    TRACE("%02x",enc28j60_read(MACON3));
+    TRACE( ("    0x"));
+    TRACE("%02x",enc28j60_read(MACON4));
+    TRACE( ("   "));
+    TRACE("%02x",enc28j60_read(MAADR5));
+    TRACE("%02x",enc28j60_read(MAADR4));
+    TRACE("%02x",enc28j60_read(MAADR3));
+    TRACE("%02x",enc28j60_read(MAADR2));
+    TRACE("%02x",enc28j60_read(MAADR1));
+    TRACE("%02x",enc28j60_read(MAADR0));
+    TRACE( ("\r\n"));
 
-    trace( ("\r\nRx   : ERXST  ERXND  ERXWRPT ERXRDPT ERXFCON EPKTCNT MAMXFL\r\n"));
-    trace( ("       0x"));
-    trace("%02x",enc28j60_read(ERXSTH));
-    trace("%02x",enc28j60_read(ERXSTL));
-    trace( (" 0x"));
-    trace("%02x",enc28j60_read(ERXNDH));
-    trace("%02x",enc28j60_read(ERXNDL));
-    trace( ("  0x"));
-    trace("%02x",enc28j60_read(ERXWRPTH));
-    trace("%02x",enc28j60_read(ERXWRPTL));
-    trace( ("  0x"));
-    trace("%02x",enc28j60_read(ERXRDPTH));
-    trace("%02x",enc28j60_read(ERXRDPTL));
-    trace( ("   0x"));
-    trace("%02x",enc28j60_read(ERXFCON));
-    trace( ("    0x"));
-    trace("%02x",enc28j60_read(EPKTCNT));
-    trace( ("  0x"));
-    trace("%02x",enc28j60_read(MAMXFLH));
-    trace("%02x",enc28j60_read(MAMXFLL));
-    trace( ("\r\n"));
+    TRACE( ("\r\nRx   : ERXST  ERXND  ERXWRPT ERXRDPT ERXFCON EPKTCNT MAMXFL\r\n"));
+    TRACE( ("       0x"));
+    TRACE("%02x",enc28j60_read(ERXSTH));
+    TRACE("%02x",enc28j60_read(ERXSTL));
+    TRACE( (" 0x"));
+    TRACE("%02x",enc28j60_read(ERXNDH));
+    TRACE("%02x",enc28j60_read(ERXNDL));
+    TRACE( ("  0x"));
+    TRACE("%02x",enc28j60_read(ERXWRPTH));
+    TRACE("%02x",enc28j60_read(ERXWRPTL));
+    TRACE( ("  0x"));
+    TRACE("%02x",enc28j60_read(ERXRDPTH));
+    TRACE("%02x",enc28j60_read(ERXRDPTL));
+    TRACE( ("   0x"));
+    TRACE("%02x",enc28j60_read(ERXFCON));
+    TRACE( ("    0x"));
+    TRACE("%02x",enc28j60_read(EPKTCNT));
+    TRACE( ("  0x"));
+    TRACE("%02x",enc28j60_read(MAMXFLH));
+    TRACE("%02x",enc28j60_read(MAMXFLL));
+    TRACE( ("\r\n"));
 
-    trace( ("\r\nTx   : ETXST  ETXND  MACLCON1 MACLCON2 MAPHSUP\r\n"));
-    trace( ("       0x"));
-    trace("%02x",enc28j60_read(ETXSTH));
-    trace("%02x",enc28j60_read(ETXSTL));
-    trace( (" 0x"));
-    trace("%02x",enc28j60_read(ETXNDH));
-    trace("%02x",enc28j60_read(ETXNDL));
-    trace( ("   0x"));
-    trace("%02x",enc28j60_read(MACLCON1));
-    trace( ("     0x"));
-    trace("%02x",enc28j60_read(MACLCON2));
-    trace( ("     0x"));
-    trace("%02x",enc28j60_read(MAPHSUP));
-    trace( ("\r\n"));
-    trace( ("\r\nPHY   : PHCON1  PHCON2  PHSTAT1 PHSTAT2\r\n"));
-    trace( ("       0x"));
-    trace("%02x",enc28j60_read(PHCON1));//ist 16 bit breit nicht 8 !
-    trace( ("     0x"));
-    trace("%02x",enc28j60_read(PHCON2));//ist 16 bit breit nicht 8 !
-    trace( ("     0x"));
-    trace("%02x",enc28j60_read(PHSTAT1));//ist 16 bit breit nicht 8 !
-    trace( ("     0x"));
-    trace("%02x",enc28j60_read(PHSTAT2));//ist 16 bit breit nicht 8 !
-    trace( ("\r\n"));
-
+    TRACE( ("\r\nTx   : ETXST  ETXND  MACLCON1 MACLCON2 MAPHSUP\r\n"));
+    TRACE( ("       0x"));
+    TRACE("%02x",enc28j60_read(ETXSTH));
+    TRACE("%02x",enc28j60_read(ETXSTL));
+    TRACE( (" 0x"));
+    TRACE("%02x",enc28j60_read(ETXNDH));
+    TRACE("%02x",enc28j60_read(ETXNDL));
+    TRACE( ("   0x"));
+    TRACE("%02x",enc28j60_read(MACLCON1));
+    TRACE( ("     0x"));
+    TRACE("%02x",enc28j60_read(MACLCON2));
+    TRACE( ("     0x"));
+    TRACE("%02x",enc28j60_read(MAPHSUP));
+    TRACE( ("\r\n"));
+    TRACE( ("\r\nPHY   : PHCON1  PHCON2  PHSTAT1 PHSTAT2\r\n"));
+    TRACE( ("       0x"));
+    TRACE("%02x",enc28j60_read(PHCON1));//ist 16 bit breit nicht 8 !
+    TRACE( ("     0x"));
+    TRACE("%02x",enc28j60_read(PHCON2));//ist 16 bit breit nicht 8 !
+    TRACE( ("     0x"));
+    TRACE("%02x",enc28j60_read(PHSTAT1));//ist 16 bit breit nicht 8 !
+    TRACE( ("     0x"));
+    TRACE("%02x",enc28j60_read(PHSTAT2));//ist 16 bit breit nicht 8 !
+    TRACE( ("\r\n"));
 }
 #endif

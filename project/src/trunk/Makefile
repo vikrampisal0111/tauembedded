@@ -4,20 +4,27 @@
 # Prove we started from main Makefile
 export STARTEDATTOP=true
 
-
-#  -D CFG_SPI	 	Enable SPI support (disablee M25LC512 and uIP if not defined)
-#  -D CFG_LCD           Enable LCD support (edit lcd/Makefile for 4 vs 8 bit LCDs)
-#  -D CFG_FATFS         Enable SD/MMC FatFS support
-#  -D CFG_UIP           Enable uIP w/ ENC28J60 on SPI0
-#
-#export LPC2148_OPTS=-D CFG_UART -D CFG_SPI -D CFG_LCD -D CFG_FATFS -D CFG_UIP
 LPC2148_OPTS=-DUART0_DEBUG
 
-SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/enc28j60 arch/lpc21xx/spi_eth lib uip apps/hello-world arch/lpc21xx/timer arch/lpc21xx/clock arch/lpc21xx/mmc 
+SUBDIRS =
+SUBDIRS += lib 
+SUBDIRS += uip 
+
+# arch
+SUBDIRS += arch/lpc21xx/uart 
+SUBDIRS += arch/lpc21xx/enc28j60 
+SUBDIRS += arch/lpc21xx/spi_eth 
+SUBDIRS += arch/lpc21xx/timer 
+SUBDIRS += arch/lpc21xx/clock 
+SUBDIRS += arch/lpc21xx/mmc
+
+#SUBDIRS += apps/hello-world
+SUBDIRS += apps/simple
+
 TARGET = main
 
 SRC = $(TARGET).c syscalls.c
-#SRC = $(TARGET).c
+
 ASRC=startup.S
 LDSCRIPT=lpc2148-flash
 
@@ -31,7 +38,21 @@ export ELFSIZE=arm-elf-size
 export ROOT=$(shell pwd)
 export COMMON=$(ROOT)/common
 
-INCLUDES = -I$(ROOT)/apps/hello-world -I$(ROOT)/lib -I$(ROOT)/arch/lpc21xx/spi_eth -I$(ROOT)/arch/lpc21xx/uart -I$(ROOT)/arch/lpc21xx/lcd -I$(ROOT)/uip -I$(ROOT)/arch/lpc21xx/enc28j60 -I$(ROOT)/arch/lpc21xx/clock -I$(ROOT)/arch/lpc21xx/timer
+INCLUDES = 
+
+INCLUDES += -I$(ROOT)/lib 
+INCLUDES += -I$(ROOT)/uip 
+
+INCLUDES += -I$(ROOT)/arch/lpc21xx/spi_eth 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/uart 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/lcd 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/enc28j60 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/clock 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
+
+# apps
+INCLUDES += -I$(ROOT)/apps/hello-world 
+INCLUDES += -I$(ROOT)/apps/simple
 
 export BASEINCLUDE=-I$(ROOT) -I$(ROOT)/include
 

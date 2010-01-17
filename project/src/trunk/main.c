@@ -11,7 +11,10 @@
 #include "uip.h"
 #include "uip_arp.h"
 #include "timer.h"
+
+// Applications
 #include "hello-world.h"
+#include "simple.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
@@ -69,7 +72,8 @@ int main(void)
 
     fflush(stdout);
 
-    hello_world_init();
+    //hello_world_init();
+    simple_init();
 
     while(1) {
 	uip_len = network_read(uip_buf);
