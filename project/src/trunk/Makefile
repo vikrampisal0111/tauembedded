@@ -9,6 +9,7 @@ LPC2148_OPTS=-DUART0_DEBUG
 SUBDIRS =
 SUBDIRS += lib 
 SUBDIRS += uip 
+SUBDIRS += fat
 
 # arch
 SUBDIRS += arch/lpc21xx/uart 
@@ -21,7 +22,8 @@ SUBDIRS += arch/lpc21xx/spi1
 #SUBDIRS += apps/hello-world
 #SUBDIRS += apps/simple
 
-TARGET = mmc_test
+
+TARGET = fat_test
 
 SRC = $(TARGET).c syscalls.c
 

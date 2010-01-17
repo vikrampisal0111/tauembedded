@@ -119,7 +119,7 @@ int mmc_init()
   
 
   // Finish initialization with get_csd() command.
-  return mmc_get_csd(); 
+  return 0;//mmc_get_csd(); 
 } 
  
 /************************** MMC Write Block ***************************/ 
