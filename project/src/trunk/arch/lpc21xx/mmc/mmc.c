@@ -1,5 +1,5 @@
 #include "type.h"
-#include "../spi/spi.h"
+#include "../spi1/spi1.h"
 #include "mmc.h"
 #include "io.h"
 
