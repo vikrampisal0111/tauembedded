@@ -1,4 +1,5 @@
 #include "spi1.h"
+#include "io.h"
 
 /* 
  *  SPI and MMC commands related modules. 

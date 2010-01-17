@@ -1,5 +1,4 @@
-#SRC_FILES=psock.c uip.c uip-fw.c uip-neighbor.c uip_timer.c uiplib.c uip_arch.c uip_arp.c 
-SRC_FILES=psock.c uip.c uip-fw.c uip-neighbor.c uiplib.c uip_arp.c timer.c 
+SRC_FILES=spi1.c
 
 #
 # Define all object files.
@@ -15,11 +14,8 @@ all :
 endif
 
 $(ARM_OBJ) : %.o : %.c Makefile .depend
-	$(CC) -c $(CFLAGS) -Wno-cast-align $< -o $@
+	$(CC) -c $(CFLAGS) -Wcast-align $< -o $@
 	$(AR) rc $(COMMON)/common.a $@
-
-clean:
-	rm -f *.o .depend
 
 #
 #  The .depend files contains the list of header files that the
