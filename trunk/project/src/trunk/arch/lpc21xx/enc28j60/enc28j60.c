@@ -50,7 +50,7 @@ www.braintechnology.de
 
 #include "busywait.h"
 //#include "irq.h"
-#include "spi.h"
+#include "../spi_eth/spi.h"
 #include "enc28j60.h"
 
 uint8_t Enc28j60Bank;
