@@ -15,6 +15,7 @@ SUBDIRS += fat
 SUBDIRS += arch/lpc21xx/uart 
 SUBDIRS += arch/lpc21xx/enc28j60 
 SUBDIRS += arch/lpc21xx/spi_eth 
+SUBDIRS += arch/lpc21xx/spi1
 SUBDIRS += arch/lpc21xx/timer 
 SUBDIRS += arch/lpc21xx/clock 
 SUBDIRS += arch/lpc21xx/mmc
@@ -45,7 +46,9 @@ INCLUDES = -I/usr/include
 INCLUDES += -I$(ROOT)/lib 
 INCLUDES += -I$(ROOT)/uip 
 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/spi1 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/spi_eth 
+
 INCLUDES += -I$(ROOT)/arch/lpc21xx/uart 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/enc28j60 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/lcd 
@@ -55,7 +58,7 @@ INCLUDES += -I$(ROOT)/arch/lpc21xx/clock
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
 # apps
-INCLUDES += -I$(ROOT)/apps/hello-world 
+#INCLUDES += -I$(ROOT)/apps/hello-world 
 INCLUDES += -I$(ROOT)/apps/simple
 
 export BASEINCLUDE=-I$(ROOT) -I$(ROOT)/include

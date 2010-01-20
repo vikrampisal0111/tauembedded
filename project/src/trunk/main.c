@@ -13,7 +13,7 @@
 #include "timer.h"
 
 // Applications
-#include "hello-world.h"
+//#include "hello-world.h"
 #include "simple.h"
 
 #define BUF ((struct uip_eth_hdr *)&uip_buf[0])
