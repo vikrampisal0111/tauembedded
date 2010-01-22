@@ -15,7 +15,7 @@ all :
 endif
 
 $(ARM_OBJ) : %.o : %.c Makefile .depend
-	$(CC) -c $(CFLAGS) -Wno-cast-align $< -o $@
+	$(CC) -c $(CFLAGS) -Wno-cast-align -Wno-pointer-sign $< -o $@
 	$(AR) rc $(COMMON)/common.a $@
 
 clean:

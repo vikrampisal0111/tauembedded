@@ -1,7 +1,7 @@
-#ifndef _SPI_H_
-#define _SPI_H_
+#ifndef __SPI1_H__
+#define __SPI1_H__
 
-#include <type.h>
+#include "type.h"
 
 /* SPI select pin */ 
 #define SPI_SEL      (1 << 11) 
@@ -11,4 +11,4 @@ void SPI_Send( BYTE *Buf, DWORD Length );
 void SSP_SendRecvByte( BYTE *Buf, DWORD Length ); 
 BYTE SSP_SendRecvByteByte( void ); 
 
-#endif //_SPI_H_
+#endif
