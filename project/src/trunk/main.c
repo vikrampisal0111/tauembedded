@@ -16,11 +16,11 @@
 //#include "hello-world.h"
 #include "simple.h"
 
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
+#define BUF ((struct __attribute__((packed))uip_eth_hdr *)&uip_buf[0])
 
 void uip_log(char *m)
 {
-  printf("uIP log message: %s\n", m);
+    printf("uIP log message: %s\n", m);
 }
 
 int main(void)
@@ -40,7 +40,7 @@ int main(void)
 
     uart0Init();
     printf("Uart Init\n");
-
+    
     network_init();
     printf("network init\n");
  
@@ -48,38 +48,38 @@ int main(void)
     printf("uIP init\n");
 
     uip_setethaddr(macaddr);
-    printf("Setting MAC address '%x:%x:%x:%x:%x:%x' with uIP\n", 
-	    macaddr.addr[0], macaddr.addr[1], macaddr.addr[2], macaddr.addr[3], macaddr.addr[4],macaddr.addr[5]);
-
-    for(i = 0; i < 6; i++) {
-	macaddr.addr[i] = 0;
-    }
-
-    enc28j60_get_mac_address((uint8_t *)&(macaddr.addr));
-    printf("Testing using driver: MAC == %x:%x:%x:%x:%x:%x\n", 
+    enc28j60_set_mac_address((uint8_t *)&(macaddr.addr));
+    printf("Setting MAC address '%x:%x:%x:%x:%x:%x'\n", 
 	    macaddr.addr[0], macaddr.addr[1], macaddr.addr[2], macaddr.addr[3], macaddr.addr[4],macaddr.addr[5]);
 
     uip_ipaddr(ipaddr, 12,12,12,13);
     uip_sethostaddr(ipaddr);
-    printf("Set host IP addr to: %d.%d.%d.%d\n", 12,12,12,13);
+    printf("Set MY IP addr to: %d.%d.%d.%d\n", 12,12,12,13);
 
     uip_ipaddr(ipaddr, 12,12,12,12);
     uip_setdraddr(ipaddr);
-    printf("Set my ip addr to: %d.%d.%d.%d\n", 12,12,12,12);
+    printf("Set default router addr to: %d.%d.%d.%d\n", 12,12,12,12);
 
-    uip_ipaddr(ipaddr, 255,255,255,0);
-    uip_setnetmask(ipaddr);
-
-    fflush(stdout);
+    //uip_ipaddr(ipaddr, 255,255,255,0);
+    //uip_setnetmask(ipaddr);
+    //fflush(stdout);
 
     //hello_world_init();
     simple_init();
 
+    //printf("sizeof(struct uip_eth_hdr): %x", sizeof(struct uip_eth_hdr));
     while(1) {
 	uip_len = network_read(uip_buf);
 	if(uip_len > 0) 
 	{
 	    printf("Got packet \n");
+	    printf("uip_len: %d\n", uip_len);
+	    printf("type: %x\n", BUF->type);
+	    for(i = 0; i < uip_len; i++) {
+		printf("%x", uip_buf[i]);
+	    }
+	    printf("\n");
+
 	    if(BUF->type == htons(UIP_ETHTYPE_IP)) 
 	    {
 		printf("Type: IP\n");

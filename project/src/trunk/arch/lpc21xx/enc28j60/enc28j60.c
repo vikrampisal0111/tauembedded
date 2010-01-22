@@ -151,6 +151,7 @@ uint16_t enc28j60_read16(uint8_t address)
     uint16_t res;
     res = enc28j60_read(address) << 8;
     res |= enc28j60_read(address+1) & 0xff;
+    return res;
 }
 
 void enc28j60_init(void)
@@ -179,7 +180,7 @@ void enc28j60_init(void)
 
     ETH_SPI_INIT();
     TRACE("SPI init\n");
-    fflush(stdout);
+    //fflush(stdout);
     //
     //  Now hold part in reset for 100ms
     //
@@ -222,9 +223,9 @@ void enc28j60_init(void)
 	busywait(500 * MS2MICROSEC);
     }
     waits = 0;
-    fflush(stdout);
+    //fflush(stdout);
     TRACE("Ended");
-    fflush(stdout);
+    //fflush(stdout);
 
     // Soft reset
     //ETH_CS_LOW();
@@ -357,7 +358,7 @@ void enc28j60_init(void)
     // Enternet receive filter set
     //	CRCEN: Post-Filter CRC Check Enable bit
     //  ANDOR: AND/OR Filter Select bit
-    enc28j60_write(ERXFCON,(CRCEN|ANDOR)); // Bank 1
+    enc28j60_write(ERXFCON,0);//(CRCEN|ANDOR)); // Bank 1
 }
 
 uint8_t  enc28j60_read_op(uint8_t op, uint8_t address)
@@ -570,7 +571,7 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 
     // limit retrieve length
     // (we reduce the MAC-reported length by 4 to remove the CRC)
-    len = IFMIN(len, maxlen);
+    len = IFMIN(len, maxlen) - 4;
 
     // copy the packet from the receive buffer
     enc28j60_read_buffer(len, packet);
@@ -583,21 +584,14 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     // Errata workaround #13. Make sure ERXRDPT is odd
     {
 	uint16_t rs,re;
-	rs = enc28j60_read(ERXSTH);
-	rs <<= 8;
-	rs |= enc28j60_read(ERXSTL);
-
-	re = enc28j60_read(ERXNDH);
-	re <<= 8;
-	re |= enc28j60_read(ERXNDL);
+	rs = enc28j60_read16(ERXSTL);
+	re = enc28j60_read(ERXNDL);
 
 	if (NextPacketPtr - 1 < rs || NextPacketPtr - 1 > re) {
-	    enc28j60_write(ERXRDPTL, (re));
-	    enc28j60_write(ERXRDPTH, (re)>>8);
+	    enc28j60_write16(ERXRDPTL, (re));
 	}
 	else {
-	    enc28j60_write(ERXRDPTL, (NextPacketPtr-1));
-	    enc28j60_write(ERXRDPTH, (NextPacketPtr-1)>>8);
+	    enc28j60_write16(ERXRDPTL, (NextPacketPtr-1));
 	}
     }
 
