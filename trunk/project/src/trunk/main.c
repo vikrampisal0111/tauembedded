@@ -17,7 +17,16 @@
 //#include "simple.h"
 
 #define ETH_BUF ((struct uip_eth_hdr *)&uip_buf[0])
+/*  
+struct test_t {
+    uint8_t x;
+};
 
+struct test_packed_t {
+    struct test_t t;
+    uint8_t x;
+} __attribute__((packed));
+*/
 void uip_log(char *m)
 {
     printf("uIP log message: %s\n", m);
@@ -57,7 +66,12 @@ int main(void)
 
     uart0Init();
     printf("Uart Init\n");
-
+/*  
+    struct test_t t1;
+    struct test_packed_t t2;
+    printf("sizeof(struct test_t) = %d\n", sizeof(t1));
+    printf("sizeof(struct test_packed_t) = %d\n", sizeof(t2));
+*/
     network_init();
     printf("network init\n");
 
