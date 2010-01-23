@@ -56,7 +56,6 @@ www.braintechnology.de
 uint8_t Enc28j60Bank;
 uint16_t NextPacketPtr;
 
-#define BUF ((struct uip_eth_hdr *)&uip_buf[0])
 #define CS_ETHERNET	    13
 #define RESET_ETHERNET	    12
 #define INTR_ETHERNET	    14
@@ -524,15 +523,14 @@ void enc28j60_packet_send(uint32_t len, uint8_t *packet)
     enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRST);
     enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRST);
     enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF | EIR_TXIF);
-    //BFCReg(EIR, EIR_TXERIF | EIR_TXIF);
 
     // Set the write pointer to start of transmit buffer area
-    enc28j60_write16(EWRPTL, (unsigned char  )TXSTART_INIT);
-    //enc28j60_write(EWRPTH, TXSTART_INIT>>8);
+    enc28j60_write16(EWRPTL, TXSTART_INIT);
 
     // Set the TXND pointer to correspond to the packet size given
-    enc28j60_write(ETXNDL, (TXSTART_INIT+len));
-    enc28j60_write(ETXNDH, (TXSTART_INIT+len)>>8);
+    // Configure the H/W with the TX base address
+    enc28j60_write16(ETXSTL, TXSTART_INIT); 
+    enc28j60_write16(ETXNDL, (TXSTART_INIT + len));
 
     // write per-packet control byte
     enc28j60_write_op(ENC28J60_WRITE_BUF_MEM, 0, 0x00);
@@ -550,6 +548,7 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     uint16_t rxstat;
     uint16_t len;
 
+    //  Sanity check that at least one full packet is present
     if( !enc28j60_read(EPKTCNT) )
 	return 0;
 
@@ -561,17 +560,42 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     NextPacketPtr  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
     NextPacketPtr |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0)<<8;
 
+    //
+    //  Sanity check
+    //
+#define RXEND         0x1fff
+    if (NextPacketPtr > RXEND)
+    {
+	enc28j60_init();
+	return 0;
+    }
+
     // read the packet length
     len  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
-    len |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0)<<8;
+    len |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0) << 8;
 
-    // read the receive status
+    // read the receive status (ignored)
     rxstat  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
-    rxstat |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0)<<8;
+    rxstat |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0) << 8;
+
+    //
+    //  If the frame is too big to handle, throw it away
+    //
+    if (len > maxlen)
+    {
+	int u;
+	for (u = 0; u < len; u++) 
+	{
+	    enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
+	}
+	TRACE("ERROR: Packet too big to handle");
+	return 0;
+    }
 
     // limit retrieve length
-    // (we reduce the MAC-reported length by 4 to remove the CRC)
-    len = IFMIN(len, maxlen) - 4;
+    // Still needed ??? (MichaelG)
+    len = IFMIN(len, maxlen);
+    //TRACE("len=%d maxlen=%d", len, maxlen);
 
     // copy the packet from the receive buffer
     enc28j60_read_buffer(len, packet);
@@ -582,7 +606,7 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     //enc28j60_write(ERXRDPTH, (NextPacketPtr)>>8);
 
     // Errata workaround #13. Make sure ERXRDPT is odd
-    {
+    if (1) {
 	uint16_t rs,re;
 	rs = enc28j60_read16(ERXSTL);
 	re = enc28j60_read(ERXNDL);
@@ -599,7 +623,8 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     // clear the PKTIF: Receive Packet Pending Interrupt Flag bit
     enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
 
-    return len;
+    // Reduce the MAC-reported length by 4 to remove the CRC
+    return len - 4;
 }
 
 

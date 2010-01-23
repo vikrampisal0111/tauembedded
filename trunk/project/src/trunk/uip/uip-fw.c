@@ -93,7 +93,7 @@ struct tcpip_hdr {
   u16_t tcpchksum;
   u8_t urgp[2];
   u8_t optdata[4];
-};
+} __attribute__((packed));
 
 struct icmpip_hdr {
   /* IP header. */
@@ -112,7 +112,7 @@ struct icmpip_hdr {
   u16_t icmpchksum;
   u16_t id, seqno;
   u8_t payload[1];
-};
+} __attribute__((packed));
 
 /* ICMP ECHO. */
 #define ICMP_ECHO 8
@@ -150,7 +150,7 @@ struct fwcache_entry {
 #if UIP_REASSEMBLY > 0
   u16_t len, offset;
 #endif
-};
+} __attribute__((packed));
 
 /*
  * The number of packets to remember when looking for duplicates.

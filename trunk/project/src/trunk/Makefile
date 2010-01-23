@@ -22,8 +22,8 @@ SUBDIRS += lib
 SUBDIRS += uip 
 #SUBDIRS += fat
 
-#SUBDIRS += apps/hello-world
-SUBDIRS += apps/simple
+SUBDIRS += apps/hello-world
+#SUBDIRS += apps/simple
 
 
 TARGET = main
@@ -59,8 +59,8 @@ INCLUDES += -I$(ROOT)/arch/lpc21xx/clock
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
 # apps
-#INCLUDES += -I$(ROOT)/apps/hello-world 
-INCLUDES += -I$(ROOT)/apps/simple
+INCLUDES += -I$(ROOT)/apps/hello-world 
+#INCLUDES += -I$(ROOT)/apps/simple
 
 export BASEINCLUDE=-I$(ROOT) -I$(ROOT)/include
 
@@ -72,26 +72,32 @@ AOBJ      = $(ASRC:.S=.o)
 # Flags
 #
 WARNINGS = -Wall 
+# Treat warnings as errors
 #WARNINGS += -Werror
-#WARNINGS += -Wextra 
-#WARNINGS += -Wshadow 
-#WARNINGS += -Wpointer-arith 
-#WARNINGS += -Wbad-function-cast 
-#WARNINGS += -Wcast-align 
-#WARNINGS += -Wsign-compare 
-#WARNINGS += -Waggregate-return 
-#WARNINGS += -Wstrict-prototypes 
-#WARNINGS += -Wmissing-prototypes 
-#WARNINGS += -Wmissing-declarations 
-#WARNINGS += -Wunused
+WARNINGS += -Wextra 
+WARNINGS += -Wshadow 
+WARNINGS += -Wpointer-arith 
+WARNINGS += -Wbad-function-cast 
+WARNINGS += -Wcast-align 
+WARNINGS += -Wsign-compare 
+WARNINGS += -Waggregate-return 
+WARNINGS += -Wstrict-prototypes 
+WARNINGS += -Wmissing-prototypes 
+WARNINGS += -Wmissing-declarations 
+WARNINGS += -Wunused
 export WARNINGS
 
 CFLAGS = $(WARNINGS)
 CFLAGS += $(INCLUDES) 
 CFLAGS += $(BASEINCLUDE)
 CFLAGS += -mcpu=arm7tdmi 
-CFLAGS += -gdwarf-2
+
+# Produce debugging info in the OS's native format
+#CFLAGS += -gdwarf-2
+
+# Optimize for size
 CFLAGS += -Os
+
 CFLAGS += -std=gnu99
 CFLAGS += $(LPC2148_OPTS)
 export CFLAGS

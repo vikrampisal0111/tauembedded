@@ -13,14 +13,31 @@
 #include "timer.h"
 
 // Applications
-//#include "hello-world.h"
-#include "simple.h"
+#include "hello-world.h"
+//#include "simple.h"
 
-#define BUF ((struct __attribute__((packed))uip_eth_hdr *)&uip_buf[0])
+#define ETH_BUF ((struct uip_eth_hdr *)&uip_buf[0])
 
 void uip_log(char *m)
 {
     printf("uIP log message: %s\n", m);
+}
+
+void printHex(uint8_t *buf, unsigned int len);
+
+void printHex(uint8_t *buf, unsigned int len) 
+{
+    unsigned int i;
+    for(i = 0; i < len; i++) {
+	if((i % 8) == 0 && i != 0) {
+	    printf("|");
+	}
+	if((i % 32) == 0 && i != 0) {
+	    printf("\n");
+	}
+
+	printf(" %.2x", buf[i]);
+    }
 }
 
 int main(void)
@@ -35,15 +52,15 @@ int main(void)
 
     timer_set(&periodic_timer, CLOCK_SECOND / 2);
     timer_set(&arp_timer, CLOCK_SECOND * 10);
- 
+
     VPBDIV = 0x02;
 
     uart0Init();
     printf("Uart Init\n");
-    
+
     network_init();
     printf("network init\n");
- 
+
     uip_init();
     printf("uIP init\n");
 
@@ -64,8 +81,8 @@ int main(void)
     //uip_setnetmask(ipaddr);
     //fflush(stdout);
 
-    //hello_world_init();
-    simple_init();
+    hello_world_init();
+    //simple_init();
 
     //printf("sizeof(struct uip_eth_hdr): %x", sizeof(struct uip_eth_hdr));
     while(1) {
@@ -73,14 +90,24 @@ int main(void)
 	if(uip_len > 0) 
 	{
 	    printf("Got packet \n");
-	    printf("uip_len: %d\n", uip_len);
-	    printf("type: %x\n", BUF->type);
-	    for(i = 0; i < uip_len; i++) {
-		printf("%x", uip_buf[i]);
-	    }
-	    printf("\n");
 
-	    if(BUF->type == htons(UIP_ETHTYPE_IP)) 
+	    //printf("uip_len: %d\n", uip_len);
+
+	    //printf("type: %.2x\n", ETH_BUF->type);
+
+	    //printf("type: %.2x", uip_buf[12]);
+	    //printf("%.2x\n", uip_buf[13]);
+
+	    //printf("dest: %.2x\n", &(ETH_BUF->dest));
+	    //printf("src: %.2x\n", &(ETH_BUF->src));
+	    //printf("type: %.2x\n", &(ETH_BUF->type));
+ 
+	    //printf("sizeof(uip_eth_addr): %.2x\n", sizeof(struct uip_eth_addr));
+
+	    //printHex(uip_buf, uip_len);
+	    //printf("\n");
+
+	    if(ETH_BUF->type == htons(UIP_ETHTYPE_IP)) 
 	    {
 		printf("Type: IP\n");
 		uip_arp_ipin();
@@ -89,11 +116,14 @@ int main(void)
 		   should be sent out on the network, the global variable
 		   uip_len is set to a value > 0. */
 		if(uip_len > 0) {
+		    printf("Sending response (uip_len: %d)\n", uip_len);
+		    printHex(uip_buf, uip_len); printf("\n");
+
 		    uip_arp_out();
 		    network_send(uip_buf, uip_len);
 		}
 	    } 
-	    else if(BUF->type == htons(UIP_ETHTYPE_ARP)) 
+	    else if(ETH_BUF->type == htons(UIP_ETHTYPE_ARP)) 
 	    {
 		printf("Type: ARP\n");
 		uip_arp_arpin();
@@ -104,10 +134,10 @@ int main(void)
 		    network_send(uip_buf, uip_len);
 		}
 	    }
-
 	} 
 	else if(timer_expired(&periodic_timer)) 
 	{
+	    //printf("Periodic timer\n");
 	    timer_reset(&periodic_timer);
 	    for(i = 0; i < UIP_CONNS; i++) 
 	    {
@@ -140,6 +170,7 @@ int main(void)
 	    /* Call the ARP timer function every 10 seconds. */
 	    if(timer_expired(&arp_timer)) 
 	    {
+		//printf("ARP timer\n");
 		timer_reset(&arp_timer);
 		uip_arp_timer();
 	    }
