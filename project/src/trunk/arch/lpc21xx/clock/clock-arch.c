@@ -43,6 +43,10 @@
 
 uint32_t tick;
 
+
+void clock_init(void);
+clock_time_t clock_time(void);
+
 // define periodic task performed using fiq in timer-arch
 void timer0_periodic_task() {
 	++tick;
@@ -51,14 +55,14 @@ void timer0_periodic_task() {
 
 /*--------------------------- clock_init ---------------------------------*/
 
-void clock_init(void)
+void clock_init()
 {
 	timer0Init();
 }
 
 /*--------------------------- clock_time ---------------------------------*/
 
-clock_time_t clock_time(void)
+clock_time_t clock_time()
 {
   return ((clock_time_t)tick);
 }

@@ -8,7 +8,7 @@
 #define CLOCKS_PCLK 6000000
 #define UART0_BAUD_RATE 19200
 
-void uart0Init();
+void uart0Init(void);
 void uart0SendByte(uint8_t c);
 
 int uart0GetByte(void);
