@@ -31,12 +31,14 @@
 #define ADDR_MASK	0x1F
 #define BANK_MASK	0x60
 #define SPRD_MASK	0x80
+
 // All-bank registers
 #define EIE		0x1B
 #define EIR		0x1C 
 #define ESTAT		0x1D
 #define ECON2		0x1E
 #define ECON1		0x1F
+
 // Bank 0 registers
 #define ERDPTL		(0x00|0x00)
 #define ERDPTH		(0x01|0x00)
@@ -62,6 +64,7 @@
 #define EDMADSTH	(0x15|0x00)
 #define EDMACSL		(0x16|0x00)
 #define EDMACSH		(0x17|0x00)
+
 // Bank 1 registers
 #define EHT0		(0x00|0x20)
 #define EHT1		(0x01|0x20)
@@ -87,6 +90,7 @@
 #define EWOLIR		(0x17|0x20)
 #define ERXFCON		(0x18|0x20)
 #define EPKTCNT		(0x19|0x20)
+
 // Bank 2 registers
 #define MACON1		(0x00|0x40|0x80)
 #define MACON2		(0x01|0x40|0x80)
@@ -107,6 +111,7 @@
 #define MIWRH		(0x17|0x40|0x80)
 #define MIRDL		(0x18|0x40|0x80)
 #define MIRDH		(0x19|0x40|0x80)
+
 // Bank 3 registers
 #define MAADR1		(0x00|0x60|0x80)
 #define MAADR0		(0x01|0x60|0x80)
@@ -124,6 +129,7 @@
 #define EFLOCON		(0x17|0x60)
 #define EPAUSL		(0x18|0x60)
 #define EPAUSH		(0x19|0x60)
+
 // PHY registers
 #define PHCON1		0x00
 #define PHSTAT1		0x01
@@ -152,17 +158,20 @@
 #define EIR_WOLIF	0x04
 #define EIR_TXERIF	0x02
 #define EIR_RXERIF	0x01
+
 // ENC28J60 ESTAT Register Bit Definitions
 #define ESTAT_INT	0x80
 #define ESTAT_LATECOL	0x10
 #define ESTAT_RXBUSY	0x04
 #define ESTAT_TXABRT	0x02
 #define ESTAT_CLKRDY	0x01
+
 // ENC28J60 ECON2 Register Bit Definitions
 #define ECON2_AUTOINC	0x80
 #define ECON2_PKTDEC	0x40
 #define ECON2_PWRSV	0x20
 #define ECON2_VRPS	0x08
+
 // ENC28J60 ECON1 Register Bit Definitions
 #define ECON1_TXRST	0x80
 #define	ECON1_RXRST	0x40
@@ -172,12 +181,14 @@
 #define	ECON1_RXEN	0x04
 #define ECON1_BSEL1	0x02
 #define ECON1_BSEL0	0x01
+
 // ENC28J60 MACON1 Register Bit Definitions
 #define MACON1_LOOPBK	0x10
 #define MACON1_TXPAUS	0x08
 #define MACON1_RXPAUS	0x04
 #define MACON1_PASSALL	0x02
 #define MACON1_MARXEN	0x01
+
 // ENC28J60 MACON2 Register Bit Definitions
 #define MACON2_MARST	0x80
 #define MACON2_RNDRST	0x40
@@ -185,6 +196,7 @@
 #define MACON2_RFUNRST	0x04
 #define MACON2_MATXRST	0x02
 #define MACON2_TFUNRST	0x01
+
 // ENC28J60 MACON3 Register Bit Definitions
 #define MACON3_PADCFG2	0x80
 #define MACON3_PADCFG1	0x40
@@ -194,6 +206,7 @@
 #define MACON3_HFRMLEN	0x04
 #define MACON3_FRMLNEN	0x02
 #define MACON3_FULDPX	0x01
+
 //
 //  MACON4 bits 
 //
@@ -206,20 +219,24 @@
 // ENC28J60 MICMD Register Bit Definitions
 #define MICMD_MIISCAN	0x02
 #define MICMD_MIIRD	0x01
+
 // ENC28J60 MISTAT Register Bit Definitions
 #define MISTAT_NVALID	0x04
 #define MISTAT_SCAN	0x02
 #define MISTAT_BUSY	0x01
+
 // ENC28J60 PHY PHCON1 Register Bit Definitions
 #define	PHCON1_PRST	0x8000
 #define	PHCON1_PLOOPBK	0x4000
 #define	PHCON1_PPWRSV	0x0800
 #define	PHCON1_PDPXMD	0x0100
+
 // ENC28J60 PHY PHSTAT1 Register Bit Definitions
 #define	PHSTAT1_PFDPX	0x1000
 #define	PHSTAT1_PHDPX	0x0800
 #define	PHSTAT1_LLSTAT	0x0004
 #define	PHSTAT1_JBSTAT	0x0002
+
 // ENC28J60 PHY PHCON2 Register Bit Definitions
 #define PHCON2_FRCLINK	0x4000
 #define PHCON2_TXDIS	0x2000
@@ -243,72 +260,60 @@
 
 
 // buffer boundaries applied to internal 8K ram
-//	entire available packet buffer space is allocated
+// entire available packet buffer space is allocated
 //#define TXSTART_INIT   	0x0000	// start TX buffer at 0
 //#define RXSTART_INIT   	0x0600	// give TX buffer space for one full ethernet frame (~1500 bytes)
 //#define RXSTOP_INIT    	0x1FFF	// receive buffer gets the rest
-//#define	MAX_FRAMELEN	1518	// maximum ethernet frame length
+//#define MAX_FRAMELEN	        1518	// maximum ethernet frame length
 
+#define RXSTART_INIT        0	// give TX buffer space for one full ethernet frame (~1500 bytes)
+#define RXSTOP_INIT    	    0x1A00	// receive buffer gets the rest
+#define TXSTART_INIT   	    0x1A01	// start RX buffer at 0
+#define	MAX_FRAMELEN	    1518	// maximum ethernet frame length
 
-
-#define RXSTART_INIT   		0	// give TX buffer space for one full ethernet frame (~1500 bytes)
-#define RXSTOP_INIT    	0x1A00	// receive buffer gets the rest
-#define TXSTART_INIT   	0x1A01	// start RX buffer at 0
-#define	MAX_FRAMELEN	1518	// maximum ethernet frame length
 // Ethernet constants
 #define ETHERNET_MIN_PACKET_LENGTH	0x3C
-//#define ETHERNET_HEADER_LENGTH		0x0E
+//#define ETHERNET_HEADER_LENGTH	0x0E
 
-        // filter shitt einstellen
-        // bit7 UCEN: Unicast Filter Enable bit 1 = Packets not having a destination address matching the local MAC address will be discarded
-        // bit6 ANDOR: AND/OR Filter Select bit 1 = AND: Packets will be rejected unless all enabled filters accept the packet
-        // bit5 CRCEN: Post-Filter CRC Check Enable bit 1 = All packets with an invalid CRC will be discarded
-        // bit4 PMEN: Pattern Match Filter Enable bit 1 = Packets must meet the pattern match criteria or they will be discarded
-        // bit3 MPEN: Magic Packet Filter Enable bit 1 = Packets must be Magic Packets for the local MAC address or they will be discarded
-        // bit2 HTEN: Hash Table Filter Enable bit 1 = Packets must meet the hash table criteria or they will be discarded
-        // bit1 MCEN: Multicast Filter Enable bit 1 = Packets must have the Least Significant bit set in the destination address or they will be discarded
-        // bit0 BCEN: Broadcast Filter Enable bit 1 = Packets must have a destination address of FF-FF-FF-FF-FF-FF or they will be discarded
+// filter shitt einstellen
+
+// bit7 UCEN: Unicast Filter Enable bit 1
+//  Packets not having a destination address matching the local MAC address will be discarded
 #define UCEN      BIT7
+
+// bit6 ANDOR: AND/OR Filter Select bit 1
+//  AND: Packets will be rejected unless all enabled filters accept the packet
 #define ANDOR     BIT6
+
+// bit5 CRCEN: Post-Filter CRC Check Enable bit 1
+//  All packets with an invalid CRC will be discarded
 #define CRCEN     BIT5
+
+// bit4 PMEN: Pattern Match Filter Enable bit 1
+//  Packets must meet the pattern match criteria or they will be discarded
 #define PMEN      BIT4
+
+// bit3 MPEN: Magic Packet Filter Enable bit 1
+//  Packets must be Magic Packets for the local MAC address or they will be discarded
 #define MPEN      BIT3
+
+// bit2 HTEN: Hash Table Filter Enable bit 1
+//  Packets must meet the hash table criteria or they will be discarded
 #define HTEN      BIT2
+
+// bit1 MCEN: Multicast Filter Enable bit 1
+//  Packets must have the Least Significant bit set in the destination address or they will be discarded
 #define MCEN      BIT1
+
+// bit0 BCEN: Broadcast Filter Enable bit 1
+//  Packets must have a destination address of FF-FF-FF-FF-FF-FF or they will be discarded
 #define BCEN      BIT0
 
-//// functions
-//void nicGetMacAddress(U08 *macaddr);
-//// setup ports for I/O
-//void nicSetMacAddress(U8 *macaddr);
-////! do a ENC28J60 read operation
-//U08 enc28j60ReadOp(U08 op, U08 address);
-////! do a ENC28J60 write operation
-//void enc28j60WriteOp(U08 op, U08 address, U08 data);
-////! read the packet buffer memory
-//void enc28j60ReadBuffer(U16 len, U08* data);
-////! write the packet buffer memory
-//void enc28j60WriteBuffer(U16 len, U08* data);
-////! set the register bank for register at address
-//void enc28j60SetBank(U08 address);
-////! read ax88796 register
-//U08 enc28j60Read(U08 address);
-////! write ax88796 register
-//void enc28j60Write(U08 address, U08 data);
-////! read a PHY register
-//U16 enc28j60PhyRead(U08 address);
-////! write a PHY register
-//void enc28j60PhyWrite(U08 address, U16 data);
-//void setb_CS_ETHERNET(void);
-//void clrb_CS_ETHERNET(void);
-//! initialize the ethernet interface for transmit/receive
-void enc28j60_Init(void);
+#define IFMIN(a,b) ((a<b)?(a):(b))
+#include "type.h"
 
-//! Packet transmit function.
-/// Sends a packet on the network.  It is assumed that the packet is headed by a valid ethernet header.
-/// \param len		Length of packet in bytes.
-/// \param packet	Pointer to packet data.
-//void enc28j60PacketSend(U16 len, U08* packet);
+//! Initialize the ethernet device
+void enc28j60_init(void);
 
 //! Packet receive function.
 /// Gets a packet from the network receive buffer, if one is available.
@@ -316,19 +321,22 @@ void enc28j60_Init(void);
 /// \param	maxlen	The maximum acceptable length of a retrieved packet.
 /// \param	packet	Pointer where packet data should be stored.
 /// \return Packet length in bytes if a packet was retrieved, zero otherwise.
-//unsigned int enc28j60PacketReceive(U16 maxlen, U8 *packet);
-//static void eint2ISR(void);
-//U16 dev_poll(void);
-//void dev_send(void);
-//void enc28j60RegDump(void);
-//bool enc28j60_powersave(U8 mode);
-#define IFMIN(a,b) ((a<b)?(a):(b))
-#include "type.h"
-  unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet);
-  void enc28j60_packet_send(uint32_t len, uint8_t *packet);
-  void enc28j60_init(void);
+unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet);
+
+//! Packet transmit function.
+/// Sends a packet on the network.
+/// It is assumed that the packet is headed by a valid ethernet header.
+/// \param len		Length of packet in bytes.
+/// \param packet	Pointer to packet data.
+void enc28j60_packet_send(uint32_t len, uint8_t *packet);
+
+
+//! Get MAC address of the device
+/// \param macaddr  Pointer to the buffer where the address will be written
 void enc28j60_get_mac_address(uint8_t *macaddr);
 
+//! Set the MAC address of the ethernet device
+/// \param macaddr Pointer to the buffer containing the mac address
 void enc28j60_set_mac_address(uint8_t *macaddr);
 
 #endif

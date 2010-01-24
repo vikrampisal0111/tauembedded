@@ -11,7 +11,7 @@
 
    struct test_t {
        uint8_t x;
-   }
+   };
    struct test_t a1;
    sizeof(a1) == 4
 
@@ -19,6 +19,6 @@
    
    struct test_packed_t {
         uint8_t x;
-   }
+   } __attribute__((packed));
    struct test_packed_t a2;
    sizeof(a2) == 1

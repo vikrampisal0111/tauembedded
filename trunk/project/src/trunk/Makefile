@@ -22,13 +22,14 @@ SUBDIRS += lib
 SUBDIRS += uip 
 #SUBDIRS += fat
 
-SUBDIRS += apps/hello-world
+SUBDIRS += apps/webserver
+#SUBDIRS += apps/hello-world
 #SUBDIRS += apps/simple
 
 
 TARGET = main
 
-SRC = $(TARGET).c syscalls.c
+SRC = $(TARGET).c syscalls.c debug.c
 
 ASRC=startup.S
 LDSCRIPT=lpc2148-flash
@@ -59,7 +60,8 @@ INCLUDES += -I$(ROOT)/arch/lpc21xx/clock
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
 # apps
-INCLUDES += -I$(ROOT)/apps/hello-world 
+INCLUDES += -I$(ROOT)/apps/webserver
+#INCLUDES += -I$(ROOT)/apps/hello-world 
 #INCLUDES += -I$(ROOT)/apps/simple
 
 export BASEINCLUDE=-I$(ROOT) -I$(ROOT)/include
