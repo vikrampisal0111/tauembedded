@@ -38,10 +38,14 @@
 #ifndef __NETWORK_H__
 #define __NETWORK_H__
 
+#include "type.h"
+
 void network_init(void);
 
-unsigned int network_read(void *pPacket);
-
+unsigned int network_read(void *packet);
 void network_send(void *pPacket, unsigned int size);
+
+void network_set_mac(uint8_t *macaddr);
+void network_get_mac(uint8_t *macaddr);
 
 #endif /* __NETWORK_H__ */

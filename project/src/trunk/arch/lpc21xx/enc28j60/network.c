@@ -36,14 +36,23 @@ void network_init(void)
     enc28j60_init();
 }
 
-
 unsigned int network_read(void *pPacket)
 {
     return enc28j60_packet_receive(1500, pPacket);
 }
 
-
 void network_send(void *pPacket, unsigned int size)
 {
     enc28j60_packet_send(size, pPacket);
 }
+
+void network_set_mac(uint8_t *macaddr)
+{
+    enc28j60_set_mac_address(macaddr);
+}
+
+void network_get_mac(uint8_t *macaddr)
+{
+    enc28j60_get_mac_address(macaddr);
+}
+
