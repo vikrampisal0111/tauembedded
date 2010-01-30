@@ -29,7 +29,7 @@ SUBDIRS += apps/webserver
 
 TARGET = main
 
-SRC = $(TARGET).c syscalls.c debug.c
+SRC = $(TARGET).c syscalls.c debug.c fatfs.c
 
 ASRC=startup.S
 LDSCRIPT=lpc2148-flash

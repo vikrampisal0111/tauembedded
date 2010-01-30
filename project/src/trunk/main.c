@@ -1,10 +1,10 @@
 #include <stdio.h>
+#include <fcntl.h>
 
 #include "debug.h"
+#include "type.h"
 
 #include "lpc214x.h"
-#include "type.h"
-#include "uart0.h"
 
 #include "network.h"
 
@@ -62,7 +62,14 @@ int main(void)
 
     VPBDIV = 0x02;
 
-    uart0Init();
+    fopen("uart0", "w");
+
+    //Regular open does not work...
+    //open("uart0", O_WRONLY, 0777);
+
+    // Testing file open interface
+    fopen("fatfs:/somefile", "r");
+
     pmesg(MSG_INFO, "- Started Uart\n");
 
     pmesg(MSG_INFO, "- Starting Network...");
