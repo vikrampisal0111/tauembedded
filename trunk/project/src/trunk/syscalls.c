@@ -1,171 +1,149 @@
-/***********************************************************************/
-/*                                                                     */
-/*  SYSCALLS.C:  System Calls Remapping                                */
-/*  most of this is from newlib-lpc and a Keil-demo                    */
-/*                                                                     */
-/*  these are "reentrant functions" as needed by                       */
-/*  the WinARM-newlib-config, see newlib-manual                        */
-/*  collected and modified by Martin Thomas                            */
-/*  TODO: some more work has to be done on this                        */
-/***********************************************************************/
+//
+// System Call Remapping
+//
 
-#include <stdlib.h>
-#include <reent.h>
-#include <sys/stat.h>
+#include <errno.h>
+#include <string.h>
 
+#include "syscalls.h"
+
+#define UNUSED_PARAM(p) ((void)(p)) 
+
+// Device drivers used
+extern const devop_tab_t devop_tab_uart0;
+extern const devop_tab_t devop_tab_fatfs;
+
+static devop_tab_t *devop_tab_list[] = {
+    &devop_tab_uart0,  /* standard input */
+    &devop_tab_uart0,  /* standard output */
+    &devop_tab_uart0,  /* standard error */
+    &devop_tab_fatfs,  /* another device */
+    0 // End on list
+};
 #include "uart0.h"
-
-// new code for _read_r provided by Alexey Shusharin - Thanks
-_ssize_t _read_r(struct _reent *r, int file, void *ptr, size_t len)
+int _open_r(struct _reent *preent, const char *file, int flags, int mode)
 {
-    char c;
-    int  i;
-    unsigned char *p;
+    UNUSED_PARAM(flags);
+    UNUSED_PARAM(mode);
 
-    p = (unsigned char*)ptr;
+    int which_devoptab = 0;
+    int fd = -1;
+    //uart0SendByte('a');
+    //uart0SendByte('\n');
+    //return 0;
 
-    for (i = 0; i < len; i++)
-    {
-	c = uart0GetByteWait();
-
-	*p++ = c;
-	uart0SendByte(c);
-
-	if (c == 0x0D && i <= (len - 2))
-	{
-	    *p = 0x0A;
-	    uart0SendByte(0x0A);
-	    return i + 2;
-	}
-    }
-    return i;
-}
-
-
-#if 0
-// old version - no longer in use
-_ssize_t _read_r(
-	struct _reent *r, 
-	int file, 
-	void *ptr, 
-	size_t len)
-{
-    char c;
-    int  i;
-    unsigned char *p;
-
-    p = (unsigned char*)ptr;
-
-    for (i = 0; i < len; i++) {
-	// c = uart0Getch();
-	c = uart0GetchW();
-	if (c == 0x0D) {
-	    *p='\0';
+    /* search for "file" in devop_tab_list[].name */
+    do {
+	int len = strlen(devop_tab_list[which_devoptab]->name);
+	if(strncmp(devop_tab_list[which_devoptab]->name, file, len) == 0) {
+	    fd = which_devoptab;
 	    break;
 	}
-	*p++ = c;
-	uart0Putch(c);
+    } while( devop_tab_list[++which_devoptab] );
+
+    /* if we found the requested file/device,
+       then invoke the device's open_r() method */
+    if( fd != -1 ) {
+	devop_tab_list[fd]->open_r(preent, file, flags, mode);
     }
-    return len - i;
+    else {
+	/* it doesn't exist! */
+	preent->_errno = ENODEV;
+    }
+
+    return fd;
+} 
+
+int _close_r (struct _reent *preent, int fd) {
+   return devop_tab_list[fd]->close_r(preent, fd);
 }
+
+_ssize_t _write_r(struct _reent *preent, int fd, const void *buf, size_t cnt) {
+    // Call appropriate driver from list
+    return devop_tab_list[fd]->write_r(preent, fd, buf, cnt);
+}
+
+_ssize_t _read_r( struct _reent *preent, int fd, void *buf, size_t cnt) {
+    // Call appropriate driver from list
+    return devop_tab_list[fd]->read_r(preent, fd, buf, cnt);
+}
+
+_off_t _lseek_r(struct _reent *preent, int fd, _off_t of, int dir)
+{
+     // Call appropriate driver from list
+    return devop_tab_list[fd]->lseek_r(preent, fd, of, dir);
+}
+
+int _fstat_r(struct _reent *preent, int fd, struct stat *stat_buf)
+{
+     // Call appropriate driver from list
+    return devop_tab_list[fd]->fstat_r(preent, fd, stat_buf);
+}
+
+// Avoid warning
+//int isatty(int fd); 
+//int isatty(int fd) {
+//    return 1;
+//}
+
+
+// end is set in the linker command file and 
+// is the end of statically allocated data (thus start of heap).
+
+#ifdef HEAP_SIZE
+
+#define HEAP_OVERFLOW_MSG	    "Panic: Heap Overflow !\n"
+#define HEAP_OVERFLOW_MSG_LEN   24
+extern char end[HEAP_SIZE];
+
+#else
+extern char end[];
 #endif
 
-_ssize_t _write_r (
-	struct _reent *r,
-	int file,
-	const void *ptr,
-	size_t len)
-{
-    int i;
-    const uint8_t *p =
-	(const uint8_t *) ptr;
+//
+// Adjusts end of heap to provide more memory to memory allocator. 
+//
+//  struct _reent *r - re-entrancy structure, used by newlib to
+//		       support multiple threads of operation.
+//  ptrdiff_t nbytes - number of bytes to add.
+//
+//  Returns pointer to start of new heap area.
+//
+//  Note: This implementation is not thread safe 
+//        (despite taking a _reent structure as a parameter).
+//
+void * _sbrk_r(struct _reent *preent, ptrdiff_t nbytes) {
+    UNUSED_PARAM(preent);
 
-    for (i = 0; i < len; i++) {
-	if (*p == '\n' ) {
-	    uart0SendByte('\r');
-	}
-	uart0SendByte(*p++);
+    // Points to current end of the heap
+    static char *pheap_end;	
+
+    // errno should be set to  ENOMEM on error
+    char *base = NULL;		
+
+    // First time init
+    if (!pheap_end) {	
+	pheap_end = end;
     }
 
-    return len;
-}
+    // Save heap end
+    base = pheap_end;	
 
-int _close_r(
-	struct _reent *r, 
-	int file)
-{
-    return 0;
-}
+#ifdef HEAP_SIZE
+    // Check overflow
+    if( pheap_end + incr - end > HEAP_SIZE ) {
 
-_off_t _lseek_r(
-	struct _reent *r, 
-	int file, 
-	_off_t ptr, 
-	int dir)
-{
-    return (_off_t)0;	/*  Always indicate we are at file beginning.	*/
-}
-
-
-int _fstat_r(
-	struct _reent *r, 
-	int file, 
-	struct stat *st)
-{
-    /*  Always set as character device.				*/
-    st->st_mode = S_IFCHR;	
-    /* assigned to strong type with implicit 	*/
-    /* signed/unsigned conversion.  Required by 	*/
-    /* newlib.					*/
-
-    return 0;
-}
-
-int isatty(int file); /* avoid warning */
-
-int isatty(int file)
-{
-    return 1;
-}
-
-#if 0
-static void _exit (int n) {
-label:  goto label; /* endless loop */
-}
-#endif 
-
-/* "malloc clue function" */
-
-/**** Locally used variables. ****/
-extern char end[];              /*  end is set in the linker command 	*/
-/* file and is the end of statically 	*/
-/* allocated data (thus start of heap).	*/
-
-static char *heap_ptr;		/* Points to current end of the heap.	*/
-
-/************************** _sbrk_r *************************************/
-/*  Support function.  Adjusts end of heap to provide more memory to	*/
-/* memory allocator. Simple and dumb with no sanity checks.		*/
-/*  struct _reent *r	-- re-entrancy structure, used by newlib to 	*/
-/*			support multiple threads of operation.		*/
-/*  ptrdiff_t nbytes	-- number of bytes to add.			*/
-/*  Returns pointer to start of new heap area.				*/
-/*  Note:  This implementation is not thread safe (despite taking a	*/
-/* _reent structure as a parameter).  					*/
-/*  Since _s_r is not used in the current implementation, the following	*/
-/* messages must be suppressed.						*/
-
-void * _sbrk_r(
-	struct _reent *_s_r, 
-	ptrdiff_t nbytes)
-{
-    char  *base;		/*  errno should be set to  ENOMEM on error	*/
-
-    if (!heap_ptr) {	/*  Initialize if first time through.		*/
-	heap_ptr = end;
+	// Heap Overflow — announce on stderr
+	write(2, HEAP_OVERFLOW_MSG, HEAP_OVERFLOW_MSG_LEN);
+	abort();
     }
-    base = heap_ptr;	/*  Point to end of heap.			*/
-    heap_ptr += nbytes;	/*  Increase heap.				*/
+#endif
 
-    return base;		/*  Return pointer to start of new heap area.	*/
+    // Increase
+    pheap_end += nbytes;
+
+    // Return pointer to start of new heap area.
+    return base;		
 }
+
+
