@@ -1,4 +1,7 @@
 
+
+#include "debug.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <io.h>
@@ -6,6 +9,7 @@
 #include "spi1.h"
 #include "mmc.h"
 
+DEFINE_pmesg_level(MSG_INFO);
 extern BYTE MMCWRData[MMC_DATA_SIZE];
 extern BYTE MMCRDData[MMC_DATA_SIZE];
 

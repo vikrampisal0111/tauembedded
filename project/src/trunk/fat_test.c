@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <io.h>
 
+#include "debug.h"
+
 #include "fat/ff.h"
 #include "spi1.h"
 #include "string.h"
@@ -9,6 +11,7 @@
 #define TST_NUM_DIR 4
 #define TST_NUM_FILE 5
 
+DEFINE_pmesg_level(MSG_INFO);
 
 int printDirContent(char* dirname)
 {
@@ -51,8 +54,8 @@ int main(void) {
   FIL file;
   uart0Init();  
   SPI_Init(); 
-   printf("Fat load result:\n");
-   printf("%d\n",f_mount(0, &fsdat));
+printf("Fat load result:\n");
+ printf("%d\n",f_mount(0, &fsdat));
 char cur_file[20] = "0:/tst1.txt";
 char cur_dir[20] = "0:/dir1";
 for (d = 0; d < TST_NUM_DIR; d++)
@@ -83,13 +86,13 @@ for (d = 0; d < TST_NUM_DIR; d++)
 
      cur_file[(d==0)?6:11] = '0'+(char)i+1;
      printf("***open file:%s\n", cur_file);
-     err = f_open(&file, cur_file, FA_CREATE_ALWAYS | FA_OPEN_ALWAYS| FA_WRITE);
+     err = f_open(&file, cur_file, FA_CREATE_ALWAYS | FA_WRITE);
 
      char * str = "hello world!";
      WORD bw;
      if (err != FR_OK && err != FR_EXIST) 
      {
-        printf("error creating file\n");
+        printf("error creating file : %d\n", err);
         return err;
      }
   
