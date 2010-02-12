@@ -35,7 +35,7 @@ DSTATUS diskInitialize (BYTE drv __attribute__ ((unused)))
         mediaStatus.statusCode = DSC_COMMANDPASS;
         mediaStatus.mediaChanged = 1;
         gDiskStatus = 0;
-//printf("\nMMC INIT OK\n");
+    printf("\nMMC INIT OK\n");
       }
       break;
 
@@ -83,15 +83,15 @@ DRESULT diskRead (BYTE disk __attribute__ ((unused)), BYTE *buff, DWORD sector, 
     return DRESULT_NOTRDY;
   if (!count) 
     return DRESULT_PARERR;
-//printf("diskRead ( %d , %d )\n", sector, count);
+printf("diskRead ( %d , %d )\n", sector, count);
   for (i = 0; i < count; i++)
   {
 		res = mmc_read_block(i + sector);
 int j;
 for (j = 0 ; j < 512; j++)
 {
-//	printf("%x ", MMCRDData[j]);
-//	if (((j+1) % 32) == 0) printf("\n");
+	//printf("%x ", MMCRDData[j]);
+	//if (((j+1) % 32) == 0) printf("\n");
 }
 
 		if (res == 0)
@@ -116,6 +116,14 @@ DRESULT diskWrite (BYTE disk __attribute__ ((unused)), const BYTE *buff, DWORD s
   DWORD res = 0;
   int i;
 
+int j;
+for (j = 0; j < 512; j++)
+{
+	//printf("%x ", MMCWRData[j]);
+	//if (((j+1) % 32) == 0) printf("\n");
+}
+
+
   if (gDiskStatus & DSTATUS_NOINIT) 
     return DRESULT_NOTRDY;
   if (gDiskStatus & DSTATUS_PROTECT) 
@@ -132,9 +140,9 @@ DRESULT diskWrite (BYTE disk __attribute__ ((unused)), const BYTE *buff, DWORD s
 			break;
 
 		res = mmc_write_block(i+sector);
-		print("write block ");
-		printNum(i);
-		print("\n");
+//		print("write block ");
+//		printNum(i);
+//		print("\n");
   }
 
 printf("&&&diskwrite result=%d\n",res);
@@ -162,6 +170,8 @@ DRESULT diskIoctl (BYTE drv, BYTE ctrl, void *buff)
 
   res = DRESULT_ERROR;
 
+  printf("ioctl - ctrl = %d\n", ctrl);
+
   switch (ctrl) 
   {
     case IOCTL_GET_SECTOR_COUNT :
@@ -172,15 +182,15 @@ printf("\n IOCTL QRY CAP %d \n", mmc_card_capacity() / 512);
       break;
 
     case IOCTL_GET_SECTOR_SIZE :
-      {
-		return 512;
+      {		
 		res = DRESULT_OK;
+		(*(int*)buff) = 512;
       }
       break;
 
     case IOCTL_CTRL_SYNC :
       {
-
+	    res = DRESULT_OK;
       }
       break;
 

@@ -13,21 +13,23 @@ SUBDIRS =
 SUBDIRS += arch/lpc21xx/uart 
 SUBDIRS += arch/lpc21xx/enc28j60 
 SUBDIRS += arch/lpc21xx/spi_eth 
-#SUBDIRS += arch/lpc21xx/spi1
+SUBDIRS += arch/lpc21xx/spi1
 SUBDIRS += arch/lpc21xx/timer 
 SUBDIRS += arch/lpc21xx/clock 
-#SUBDIRS += arch/lpc21xx/mmc
+SUBDIRS += arch/lpc21xx/mmc
 
 SUBDIRS += lib 
 SUBDIRS += uip 
-#SUBDIRS += fat
+SUBDIRS += fat
 
 SUBDIRS += apps/webserver
 #SUBDIRS += apps/hello-world
 #SUBDIRS += apps/simple
 
 
-TARGET = main
+#TARGET = main
+TARGET = fat_test
+#TARGET = mmc_test
 
 SRC = $(TARGET).c syscalls.c debug.c fatfs.c
 
@@ -49,13 +51,13 @@ INCLUDES = -I/usr/include
 INCLUDES += -I$(ROOT)/lib 
 INCLUDES += -I$(ROOT)/uip 
 
-#INCLUDES += -I$(ROOT)/arch/lpc21xx/spi1 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/spi1 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/spi_eth 
 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/uart 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/enc28j60 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/lcd 
-#INCLUDES += -I$(ROOT)/arch/lpc21xx/mmc 
+INCLUDES += -I$(ROOT)/arch/lpc21xx/mmc 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/clock 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 

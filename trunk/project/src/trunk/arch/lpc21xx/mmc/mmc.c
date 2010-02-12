@@ -141,8 +141,8 @@ int mmc_write_block(WORD block_number)
   IOCLR0 = SPI_SEL; /* clear SPI SSEL */ 
    
   /* block size has been set in mmc_init() */ 
-  varl=((block_number&0x003F)<<9); 
-  varh=((block_number&0xFFC0)>>7); 
+  varl=((block_number&0x007F)<<9); 
+  varh=((block_number&0xFF80)>>7); 
  
   /* send mmc CMD24(WRITE_SINGLE_BLOCK) to write the data to MMC card */ 
   MMCCmd[0] = 0x58; 
@@ -216,19 +216,24 @@ int mmc_read_block(WORD block_number)
  
   IOCLR0 = SPI_SEL; /* clear SPI SSEL */ 
  
-  varl=((block_number&0x003F)<<9); 
-  varh=((block_number&0xFFC0)>>7); 
+  varl=((block_number&0x007F)<<9); 
+  varh=((block_number&0xFF80)>>7); 
  
   /* send MMC CMD17(READ_SINGLE_BLOCK) to read the data from MMC card */ 
   MMCCmd[0] = 0x51; 
   /* high block address bits, varh HIGH and LOW */ 
-  MMCCmd[1] = varh >> 0x08; 
+  MMCCmd[1] = varh >> 0x08;
   MMCCmd[2] = varh & 0xFF; 
   /* low block address bits, varl HIGH and LOW */ 
   MMCCmd[3] = varl >> 0x08; 
   MMCCmd[4] = varl & 0xFF; 
   /* checksum is no longer required but we always send 0xFF */ 
   MMCCmd[5] = 0xFF; 
+
+#if 0
+for (int i = 0; i < 6; i++)
+    printf("MMCCmd[%d] = %x\n",i,MMCCmd[i]);
+#endif
   SPI_Send(MMCCmd, MMC_CMD_SIZE ); 
  
   /* if mmc_response returns 1 then we failed to get a 0x00 response */ 
