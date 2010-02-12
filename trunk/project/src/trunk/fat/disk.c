@@ -67,6 +67,7 @@ DSTATUS diskShutdown (void)
 //
 DSTATUS diskStatus (BYTE drv __attribute__ ((unused)))
 {
+printf("&&&diskstatus\n");
   return gDiskStatus;
 }
 
@@ -99,6 +100,7 @@ for (j = 0 ; j < 512; j++)
 			break;
   }
   
+printf("&&&diskread result=%d\n",res);
   if (res == 0)
     return DRESULT_OK;
   else
@@ -135,6 +137,7 @@ DRESULT diskWrite (BYTE disk __attribute__ ((unused)), const BYTE *buff, DWORD s
 		print("\n");
   }
 
+printf("&&&diskwrite result=%d\n",res);
   if (res == 0)
     return DRESULT_OK;
   else
@@ -206,7 +209,9 @@ printf("\n IOCTL QRY CAP %d \n", mmc_card_capacity() / 512);
       res = DRESULT_PARERR;
   }
 
-  return res;
+printf("&&&diskioctl result=%d\n",res);
+
+  return 0;
 }
 
 //
