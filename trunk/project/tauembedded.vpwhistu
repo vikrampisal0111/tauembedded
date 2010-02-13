@@ -1,0 +1,142 @@
+[Global]
+CurrentProject=tauembedded.vpj
+[ProjectDates]
+tauembedded.vpj=20100213160342000
+[ActiveConfig]
+tauembedded.vpj=,Debug
+[TreeExpansion2]
+- tauembedded.vpj
+  - Source Files
+  + Header Files
+  + Resource Files
+  + Bitmaps
+  + Other Files
+scroll:0
+[State]
+SCREEN: 1024 768 0 25 1024 693 0 0 N 0 0 0 0 695 247 0
+CWD: src/trunk/
+BUFFER: BN="src/trunk/fat/fserv.h"
+BI: MA=1 74 1  TABS=1 4  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C/C++	HM=0 MF=104 TL=0 MLL=0 ASE=0 LNL=1 LCF=0 CAPS=0 E=0 ESBU2=-1 CL="" SC="" SCE= SCU=
+VIEW: LN=.551 CL=16 LE=0 CX=17 CY=12 WI=5 BI=23 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="src/trunk/fat/fserv.c"
+BI: MA=1 74 1  TABS=1 4  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C/C++	HM=0 MF=616 TL=0 MLL=0 ASE=0 LNL=1 LCF=0 CAPS=0 E=0 ESBU2=-1 CL="" SC="" SCE= SCU=
+VIEW: LN=.3239 CL=1 LE=0 CX=2 CY=17 WI=5 BI=24 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="src/trunk/fserv_test.c"
+BI: MA=1 74 1  TABS=1 4  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C/C++	HM=0 MF=131688 TL=0 MLL=0 ASE=0 LNL=1 LCF=0 CAPS=0 E=0 ESBU2=1 CL="" SC="" SCE= SCU=
+VIEW: LN=.116 CL=15 LE=0 CX=16 CY=9 WI=5 BI=31 HT=0 HN=0 HF=0 HC=4
+BUFFER: BN="src/trunk/fat_test.c"
+BI: MA=1 74 1  TABS=1 4  WWS=1 IWT=0 ST=0 IN=2 BW=0 US=32000 RO=0 SE=1 SN=0 BIN=0 MN=C/C++	HM=0 MF=616 TL=0 MLL=0 ASE=0 LNL=1 LCF=0 CAPS=0 E=0 ESBU2=-1 CL="" SC="" SCE= SCU=
+VIEW: LN=.0 CL=1 LE=0 CX=2 CY=0 WI=5 BI=27 HT=0 HN=0 HF=0 HC=4
+WINDOW: 18 24 538 162 0 0 N  WF=0 WT=3 ",,,"
+BUFFER: BN="src/trunk/fat/fserv.h"
+VIEW: LN=.551 CL=16 LE=0 CX=17 CY=12 WI=183 BI=23 HT=0 HN=0 HF=0 HC=4
+WINDOW: 0 0 538 267 0 0 N  WF=0 WT=1 ",,,"
+BUFFER: BN="src/trunk/fat/fserv.c"
+VIEW: LN=.3239 CL=1 LE=0 CX=2 CY=17 WI=181 BI=24 HT=0 HN=0 HF=0 HC=4
+WINDOW: 36 48 538 220 0 0 N  WF=0 WT=4 ",,,"
+BUFFER: BN="src/trunk/fat_test.c"
+VIEW: LN=.0 CL=1 LE=0 CX=2 CY=0 WI=251 BI=27 HT=0 HN=0 HF=0 HC=4
+WINDOW: 54 72 538 220 0 0 M  WF=0 WT=5 ",,,"
+BUFFER: BN="src/trunk/fserv_test.c"
+VIEW: LN=.116 CL=15 LE=0 CX=16 CY=3 WI=240 BI=31 HT=0 HN=0 HF=0 HC=4
+FILEHIST: 4
+src/trunk/fat/fserv.h
+src/trunk/fat/fserv.c
+src/trunk/fat_test.c
+src/trunk/fserv_test.c
+DEBUG: 0 0 0 0 3 0 gdb
+printf
+strcpy
+std::*
+DEBUG2: 0
+PROJECT_CACHE: 1
+20100213154331000 88 /home/eyal/tauembedded/tauembedded.vpj
+src/trunk/arch/lpc21xx/uart/_test.c
+src/trunk/lib/busywait.c
+src/trunk/arch/lpc21xx/clock/clock-arch.c
+src/trunk/debug.c
+src/trunk/fat/disk.c
+src/trunk/arch/lpc21xx/enc28j60/enc28j60.c
+src/trunk/fat_test.c
+src/trunk/fatfs.c
+src/trunk/fat/ff.c
+src/trunk/fat/fserv.c
+src/trunk/fat/fserv.h
+src/trunk/fserv_test.c
+src/trunk/apps/hello-world/hello-world.c
+src/trunk/apps/webserver/http-strings.c
+src/trunk/apps/webserver/httpd-cgi.c
+src/trunk/apps/webserver/httpd-fs.c
+src/trunk/apps/webserver/httpd-fsdata.c
+src/trunk/apps/webserver/httpd.c
+src/trunk/arch/lpc21xx/lcd/lcd.c
+src/trunk/main.c
+src/trunk/Makefile
+src/trunk/fat/Makefile
+src/trunk/lib/memb.c
+src/trunk/arch/lpc21xx/mmc/mmc.c
+src/trunk/mmc_test.c
+src/trunk/arch/lpc21xx/enc28j60/network.c
+src/trunk/arch/lpc21xx/uart/print.c
+src/trunk/uip/psock.c
+src/trunk/apps/simple/simple.c
+src/trunk/arch/lpc21xx/spi_eth/spi.c
+src/trunk/arch/lpc21xx/spi1/spi1.c
+src/trunk/syscalls.c
+src/trunk/arch/lpc21xx/timer/timer-arch.c
+src/trunk/uip/timer.c
+src/trunk/arch/lpc21xx/uart/uart0.c
+src/trunk/uip/uip-fw.c
+src/trunk/uip/uip-neighbor.c
+src/trunk/uip/uip-split.c
+src/trunk/uip/uip.c
+src/trunk/uip/uip_arp.c
+src/trunk/uip/uiplib.c
+src/trunk/lib/busywait.h
+src/trunk/arch/lpc21xx/clock/clock-arch.h
+src/trunk/uip/clock.h
+src/trunk/include/debug.h
+src/trunk/fat/disk.h
+src/trunk/arch/lpc21xx/enc28j60/enc28j60.h
+src/trunk/fatfs.h
+src/trunk/fat/ff.h
+src/trunk/apps/hello-world/hello-world.h
+src/trunk/apps/webserver/http-strings.h
+src/trunk/apps/webserver/httpd-cgi.h
+src/trunk/apps/webserver/httpd-fs.h
+src/trunk/apps/webserver/httpd-fsdata.h
+src/trunk/apps/webserver/httpd.h
+src/trunk/include/interrupt.h
+src/trunk/include/io.h
+src/trunk/uip/lc-addrlabels.h
+src/trunk/uip/lc-switch.h
+src/trunk/uip/lc.h
+src/trunk/arch/lpc21xx/lcd/lcd.h
+src/trunk/include/lpc214x.h
+src/trunk/lib/memb.h
+src/trunk/arch/lpc21xx/mmc/mmc.h
+src/trunk/arch/lpc21xx/enc28j60/network.h
+src/trunk/arch/lpc21xx/uart/print.h
+src/trunk/uip/psock.h
+src/trunk/uip/pt.h
+src/trunk/apps/simple/simple.h
+src/trunk/arch/lpc21xx/spi_eth/spi.h
+src/trunk/arch/lpc21xx/spi1/spi1.h
+src/trunk/include/syscalls.h
+src/trunk/fat/sysdefs.h
+src/trunk/arch/lpc21xx/timer/timer-arch.h
+src/trunk/uip/timer.h
+src/trunk/include/trace.h
+src/trunk/include/type.h
+src/trunk/arch/lpc21xx/uart/uart0.h
+src/trunk/include/uip-conf.h
+src/trunk/uip/uip-fw.h
+src/trunk/uip/uip-neighbor.h
+src/trunk/uip/uip-split.h
+src/trunk/uip/uip.h
+src/trunk/uip/uip_arch.h
+src/trunk/uip/uip_arp.h
+src/trunk/uip/uiplib.h
+src/trunk/uip/uipopt.h
+src/trunk/apps/webserver/webserver.h
+TBCLASS: 0 0
