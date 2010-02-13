@@ -1,4 +1,4 @@
-SRC_FILES=ff.c disk.c
+SRC_FILES=ff.c disk.c fserv.c
 
 #
 # Define all object files.
