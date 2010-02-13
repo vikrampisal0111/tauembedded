@@ -611,10 +611,10 @@ BYTE check_fs (   /* 0:The FAT boot record, 1:Valid boot record but not an FAT, 
 	int i;
   if (diskRead(fs->drive, fs->win, sect, 1) != DRESULT_OK)  /* Load boot record */
     return 2;
-	printf("\nafter read\n");
+	
   if (LD_WORD(&fs->win[BS_55AA]) != 0xAA55)        /* Check record signature (always offset 510) */
     return 2;
-	printf("\nafter sector sig check\n");
+	
 
 isFat[0] = fs->win[BS_FilSysType];
 isFat[1] = fs->win[BS_FilSysType+1];
@@ -658,16 +658,10 @@ FRESULT auto_mount (    /* FR_OK(0): successful, !=0: any error occured */
     drv = 0;    /* No drive number is given, select drive 0 in default */
   if (*p == '/') p++; /* Strip heading slash */
   *path = p;      /* Return pointer to the path name */
-   
-   printf("drive:");
-   printf("%d",drv);
-   printf("\n");
-
+     
   /* Check if the drive number is valid or not */
   if (drv >= _DRIVES) return FR_INVALID_DRIVE;  /* Is the drive number valid? */
-printf("fs = FatFs[drv]\n");
   if (!(fs = FatFs[drv])) return FR_NOT_ENABLED;  /* Is the file system object registered? */
-printf("fs = FatFs[drv]ok\n");
   *rfs = fs;      /* Returen pointer to the corresponding file system object */
 
   /* Check if the logical drive has been mounted or not */
@@ -958,7 +952,7 @@ printf("\n NOFILE-create new \n");
   fp->fptr = 0;           /* File ptr */
   fp->sect_clust = 1;         /* Sector counter */
   fp->fs = fs; fp->id = fs->id;   /* Owner file system object of the file */
-printf("\n RET FR_OK \n");
+
   return FR_OK;
 }
 

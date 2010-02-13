@@ -11,6 +11,7 @@
 #include "disk.h"
 #include "mmc.h"
 #include "spi1.h"
+#include "debug.h"
 
 #define S_MAX_SIZ 512
 static volatile DSTATUS gDiskStatus = DSTATUS_NOINIT; 
@@ -35,7 +36,7 @@ DSTATUS diskInitialize (BYTE drv __attribute__ ((unused)))
         mediaStatus.statusCode = DSC_COMMANDPASS;
         mediaStatus.mediaChanged = 1;
         gDiskStatus = 0;
-    printf("\nMMC INIT OK\n");
+        pmesg(MSG_DEBUG,"\nMMC INIT OK\n");
       }
       break;
 
@@ -67,7 +68,7 @@ DSTATUS diskShutdown (void)
 //
 DSTATUS diskStatus (BYTE drv __attribute__ ((unused)))
 {
-printf("&&&diskstatus\n");
+  pmesg(MSG_DEBUG_MORE,"&&&diskstatus\n");
   return gDiskStatus;
 }
 
@@ -83,15 +84,15 @@ DRESULT diskRead (BYTE disk __attribute__ ((unused)), BYTE *buff, DWORD sector, 
     return DRESULT_NOTRDY;
   if (!count) 
     return DRESULT_PARERR;
-printf("diskRead ( %d , %d )\n", sector, count);
+  pmesg(MSG_DEBUG_MORE,"diskRead ( %d , %d )\n", sector, count);
   for (i = 0; i < count; i++)
   {
 		res = mmc_read_block(i + sector);
 int j;
 for (j = 0 ; j < 512; j++)
 {
-	//printf("%x ", MMCRDData[j]);
-	//if (((j+1) % 32) == 0) printf("\n");
+	pmesg(MSG_DEBUG_MORE,"%x ", MMCRDData[j]);
+	if (((j+1) % 32) == 0) pmesg(MSG_DEBUG_MORE,"\n");
 }
 
 		if (res == 0)
@@ -100,7 +101,7 @@ for (j = 0 ; j < 512; j++)
 			break;
   }
   
-printf("&&&diskread result=%d\n",res);
+pmesg(MSG_DEBUG_MORE,"&&&diskread result=%d\n",res);
   if (res == 0)
     return DRESULT_OK;
   else
@@ -119,8 +120,8 @@ DRESULT diskWrite (BYTE disk __attribute__ ((unused)), const BYTE *buff, DWORD s
 int j;
 for (j = 0; j < 512; j++)
 {
-	//printf("%x ", MMCWRData[j]);
-	//if (((j+1) % 32) == 0) printf("\n");
+	pmesg(MSG_DEBUG_MORE,"%x ", MMCWRData[j]);
+	if (((j+1) % 32) == 0) pmesg(MSG_DEBUG_MORE,"\n");
 }
 
 
@@ -140,12 +141,9 @@ for (j = 0; j < 512; j++)
 			break;
 
 		res = mmc_write_block(i+sector);
-//		print("write block ");
-//		printNum(i);
-//		print("\n");
   }
 
-printf("&&&diskwrite result=%d\n",res);
+pmesg(MSG_DEBUG_MORE,"&&&diskwrite result=%d\n",res);
   if (res == 0)
     return DRESULT_OK;
   else
@@ -170,13 +168,13 @@ DRESULT diskIoctl (BYTE drv, BYTE ctrl, void *buff)
 
   res = DRESULT_ERROR;
 
-  printf("ioctl - ctrl = %d\n", ctrl);
+  pmesg(MSG_DEBUG_MORE,"ioctl - ctrl = %d\n", ctrl);
 
   switch (ctrl) 
   {
     case IOCTL_GET_SECTOR_COUNT :
       { 
-printf("\n IOCTL QRY CAP %d \n", mmc_card_capacity() / 512);
+         pmesg(MSG_DEBUG_MORE,"\n IOCTL QRY CAP %d \n", mmc_card_capacity() / 512);
 		return mmc_card_capacity() / 512;
       }
       break;
@@ -219,7 +217,7 @@ printf("\n IOCTL QRY CAP %d \n", mmc_card_capacity() / 512);
       res = DRESULT_PARERR;
   }
 
-printf("&&&diskioctl result=%d\n",res);
+  pmesg(MSG_DEBUG_MORE,"&&&diskioctl result=%d\n",res);
 
   return 0;
 }
