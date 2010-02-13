@@ -28,9 +28,9 @@ SUBDIRS += apps/webserver
 
 
 #TARGET = main
-TARGET = fat_test
+#TARGET = fat_test
 #TARGET = mmc_test
-
+TARGET = fserv_test
 SRC = $(TARGET).c syscalls.c debug.c fatfs.c
 
 ASRC=startup.S
@@ -78,20 +78,20 @@ AOBJ      = $(ASRC:.S=.o)
 WARNINGS = -Wall 
 # Treat warnings as errors
 #WARNINGS += -Werror
-WARNINGS += -Wextra 
-WARNINGS += -Wshadow 
-WARNINGS += -Wpointer-arith 
-WARNINGS += -Wbad-function-cast 
-WARNINGS += -Wcast-align 
-WARNINGS += -Wsign-compare 
-WARNINGS += -Waggregate-return 
-WARNINGS += -Wstrict-prototypes 
-WARNINGS += -Wmissing-prototypes 
-WARNINGS += -Wmissing-declarations 
-WARNINGS += -Wunused
+#WARNINGS += -Wextra 
+#WARNINGS += -Wshadow 
+#WARNINGS += -Wpointer-arith 
+#WARNINGS += -Wbad-function-cast 
+#WARNINGS += -Wcast-align 
+#WARNINGS += -Wsign-compare 
+#WARNINGS += -Waggregate-return 
+#WARNINGS += -Wstrict-prototypes 
+#WARNINGS += -Wmissing-prototypes 
+#WARNINGS += -Wmissing-declarations 
+#WARNINGS += -Wunused
 export WARNINGS
 
-CFLAGS = $(WARNINGS)
+CFLAGS += -Wall
 CFLAGS += $(INCLUDES) 
 CFLAGS += $(BASEINCLUDE)
 CFLAGS += -mcpu=arm7tdmi 
@@ -113,7 +113,7 @@ export LDFLAGS
 ASFLAGS = -I. -x assembler-with-cpp
 ASFLAGS += -mcpu=arm7tdmi
 ASFLAGS += $(ADEFS) 
-ASFLAGS += -Wa,--gdwarf-2
+ASFLAGS += -Wall -gdwarf-2
 
 # Define all listing files.
 #LST = $(ASRC:.S=.lst) $(SRC:.c=.lst) 
@@ -168,7 +168,7 @@ program: bin
 
 # Compile: create object files from C source files.
 $(COBJ) : %.o : %.c Makefile .depend
-	$(CC) -c $(CFLAGS) $(GENDEPFLAGS) $< -o $@ 
+	$(CC) -c $(CFLAGS) $< -o $@ 
 
 # Assemble: create object files from assembler source files.
 $(AOBJ) : %.o : %.S

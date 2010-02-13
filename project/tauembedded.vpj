@@ -1,0 +1,301 @@
+<!DOCTYPE Project SYSTEM "http://www.slickedit.com/dtd/vse/10.0/vpj.dtd">
+<Project
+   Version="10.0"
+   VendorName="SlickEdit"
+   WorkingDir=".">
+   <Config
+      Name="Debug"
+      Type="gnuc"
+      DebugCallbackName="gdb"
+      Version="1"
+      OutputFile="%bdtauembedded"
+      CompilerConfigName="Latest Version">
+      <Menu>
+         <Target
+            Name="Compile"
+            MenuCaption="&amp;Compile"
+            Dialog="_gnuc_options_form Compile"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            OutputExts="*.o"
+            SaveOption="SaveCurrent"
+            RunFromDir="%rw">
+            <Exec CmdLine='gcc -ansi -c %xup  %defd -g -o "%bd%n%oe" %i "%f"'/>
+         </Target>
+         <Target
+            Name="Link"
+            MenuCaption="&amp;Link"
+            ShowOnMenu="Never"
+            Dialog="_gnuc_options_form Link"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveCurrent"
+            RunFromDir="%rw">
+            <Exec CmdLine='gcc -ansi %xup -g -o "%o" %f %libs'/>
+         </Target>
+         <Target
+            Name="Build"
+            MenuCaption="&amp;Build"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles"
+            RunFromDir="/home/eyal/tauembedded/src/trunk/">
+            <Exec CmdLine="make"/>
+         </Target>
+         <Target
+            Name="Rebuild"
+            MenuCaption="&amp;Rebuild"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles"
+            RunFromDir="/home/eyal/tauembedded/src/trunk/">
+            <Exec CmdLine="make clean; make;"/>
+         </Target>
+         <Target
+            Name="Program"
+            MenuCaption="&amp;Program"
+            RunFromDir="/home/eyal/tauembedded/src/trunk/"
+            CaptureOutputWith="ProcessBuffer">
+            <Exec CmdLine="make program"/>
+         </Target>
+         <Target
+            Name="Debug"
+            MenuCaption="&amp;Debug"
+            Dialog="_gnuc_options_form Run/Debug"
+            BuildFirst="1"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveNone"
+            RunFromDir="%rw">
+            <Exec CmdLine='vsdebugio -prog "%o"'/>
+         </Target>
+         <Target
+            Name="Execute"
+            MenuCaption="E&amp;xecute"
+            Dialog="_gnuc_options_form Run/Debug"
+            BuildFirst="1"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles"
+            RunFromDir="%rw">
+            <Exec CmdLine='"%o"'/>
+         </Target>
+         <Target
+            Name="dash"
+            MenuCaption="-"
+            Deletable="0">
+            <Exec/>
+         </Target>
+         <Target
+            Name="GNU C Options"
+            MenuCaption="GNU C &amp;Options..."
+            ShowOnMenu="HideIfNoCmdLine"
+            Deletable="0"
+            SaveOption="SaveNone">
+            <Exec
+               CmdLine="gnucoptions"
+               Type="Slick-C"/>
+         </Target>
+      </Menu>
+      <Includes>
+      </Includes>
+   </Config>
+   <Config
+      Name="Release"
+      Type="gnuc"
+      DebugCallbackName="gdb"
+      Version="1"
+      OutputFile="%bdtauembedded"
+      CompilerConfigName="Latest Version">
+      <Menu>
+         <Target
+            Name="Compile"
+            MenuCaption="&amp;Compile"
+            Dialog="_gnuc_options_form Compile"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            OutputExts="*.o"
+            SaveOption="SaveCurrent"
+            RunFromDir="%rw">
+            <Exec CmdLine='gcc -ansi -c %xup %defd -o "%bd%n%oe" %i "%f"'/>
+         </Target>
+         <Target
+            Name="Link"
+            MenuCaption="&amp;Link"
+            ShowOnMenu="Never"
+            Dialog="_gnuc_options_form Link"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveCurrent"
+            RunFromDir="%rw">
+            <Exec CmdLine='gcc -ansi %xup -o "%o" %f %libs'/>
+         </Target>
+         <Target
+            Name="Build"
+            MenuCaption="&amp;Build"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles">
+            <Exec CmdLine=""/>
+         </Target>
+         <Target
+            Name="Rebuild"
+            MenuCaption="&amp;Rebuild"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles"
+            RunFromDir="%rw">
+            <Exec CmdLine=""/>
+         </Target>
+         <Target
+            Name="Debug"
+            MenuCaption="&amp;Debug"
+            Dialog="_gnuc_options_form Run/Debug"
+            BuildFirst="1"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveNone"
+            RunFromDir="%rw">
+            <Exec CmdLine='vsdebugio -prog "%o"'/>
+         </Target>
+         <Target
+            Name="Execute"
+            MenuCaption="E&amp;xecute"
+            Dialog="_gnuc_options_form Run/Debug"
+            BuildFirst="1"
+            CaptureOutputWith="ProcessBuffer"
+            Deletable="0"
+            SaveOption="SaveWorkspaceFiles"
+            RunFromDir="%rw">
+            <Exec CmdLine='"%o"'/>
+         </Target>
+         <Target
+            Name="dash"
+            MenuCaption="-"
+            Deletable="0">
+            <Exec/>
+         </Target>
+         <Target
+            Name="GNU C Options"
+            MenuCaption="GNU C &amp;Options..."
+            ShowOnMenu="HideIfNoCmdLine"
+            Deletable="0"
+            SaveOption="SaveNone">
+            <Exec
+               CmdLine="gnucoptions"
+               Type="Slick-C"/>
+         </Target>
+      </Menu>
+   </Config>
+   <Files>
+      <Folder
+         Name="Source Files"
+         Filters="*.c;*.C;*.cc;*.cpp;*.cp;*.cxx;*.c++;*.prg;*.pas;*.dpr;*.asm;*.s;*.bas;*.java;*.cs;*.sc;*.e;*.cob;*.html;*.rc;*.tcl;*.py;*.pl;*.d">
+         <F N="src/trunk/arch/lpc21xx/uart/_test.c"/>
+         <F N="src/trunk/lib/busywait.c"/>
+         <F N="src/trunk/arch/lpc21xx/clock/clock-arch.c"/>
+         <F N="src/trunk/debug.c"/>
+         <F N="src/trunk/fat/disk.c"/>
+         <F N="src/trunk/arch/lpc21xx/enc28j60/enc28j60.c"/>
+         <F N="src/trunk/fat_test.c"/>
+         <F N="src/trunk/fatfs.c"/>
+         <F N="src/trunk/fat/ff.c"/>
+         <F N="src/trunk/fat/fserv.c"/>
+         <F N="src/trunk/fat/fserv.h"/>
+         <F N="src/trunk/fserv_test.c"/>
+         <F N="src/trunk/apps/hello-world/hello-world.c"/>
+         <F N="src/trunk/apps/webserver/http-strings.c"/>
+         <F N="src/trunk/apps/webserver/httpd-cgi.c"/>
+         <F N="src/trunk/apps/webserver/httpd-fs.c"/>
+         <F N="src/trunk/apps/webserver/httpd-fsdata.c"/>
+         <F N="src/trunk/apps/webserver/httpd.c"/>
+         <F N="src/trunk/arch/lpc21xx/lcd/lcd.c"/>
+         <F N="src/trunk/main.c"/>
+         <F
+            N="src/trunk/Makefile"
+            Type="Makefile"/>
+         <F
+            N="src/trunk/fat/Makefile"
+            Type="Makefile"/>
+         <F N="src/trunk/lib/memb.c"/>
+         <F N="src/trunk/arch/lpc21xx/mmc/mmc.c"/>
+         <F N="src/trunk/mmc_test.c"/>
+         <F N="src/trunk/arch/lpc21xx/enc28j60/network.c"/>
+         <F N="src/trunk/arch/lpc21xx/uart/print.c"/>
+         <F N="src/trunk/uip/psock.c"/>
+         <F N="src/trunk/apps/simple/simple.c"/>
+         <F N="src/trunk/arch/lpc21xx/spi_eth/spi.c"/>
+         <F N="src/trunk/arch/lpc21xx/spi1/spi1.c"/>
+         <F N="src/trunk/syscalls.c"/>
+         <F N="src/trunk/arch/lpc21xx/timer/timer-arch.c"/>
+         <F N="src/trunk/uip/timer.c"/>
+         <F N="src/trunk/arch/lpc21xx/uart/uart0.c"/>
+         <F N="src/trunk/uip/uip-fw.c"/>
+         <F N="src/trunk/uip/uip-neighbor.c"/>
+         <F N="src/trunk/uip/uip-split.c"/>
+         <F N="src/trunk/uip/uip.c"/>
+         <F N="src/trunk/uip/uip_arp.c"/>
+         <F N="src/trunk/uip/uiplib.c"/>
+      </Folder>
+      <Folder
+         Name="Header Files"
+         Filters="*.h;*.H;*.hh;*.hpp;*.hxx;*.inc;*.sh;*.cpy;*.if">
+         <F N="src/trunk/lib/busywait.h"/>
+         <F N="src/trunk/arch/lpc21xx/clock/clock-arch.h"/>
+         <F N="src/trunk/uip/clock.h"/>
+         <F N="src/trunk/include/debug.h"/>
+         <F N="src/trunk/fat/disk.h"/>
+         <F N="src/trunk/arch/lpc21xx/enc28j60/enc28j60.h"/>
+         <F N="src/trunk/fatfs.h"/>
+         <F N="src/trunk/fat/ff.h"/>
+         <F N="src/trunk/apps/hello-world/hello-world.h"/>
+         <F N="src/trunk/apps/webserver/http-strings.h"/>
+         <F N="src/trunk/apps/webserver/httpd-cgi.h"/>
+         <F N="src/trunk/apps/webserver/httpd-fs.h"/>
+         <F N="src/trunk/apps/webserver/httpd-fsdata.h"/>
+         <F N="src/trunk/apps/webserver/httpd.h"/>
+         <F N="src/trunk/include/interrupt.h"/>
+         <F N="src/trunk/include/io.h"/>
+         <F N="src/trunk/uip/lc-addrlabels.h"/>
+         <F N="src/trunk/uip/lc-switch.h"/>
+         <F N="src/trunk/uip/lc.h"/>
+         <F N="src/trunk/arch/lpc21xx/lcd/lcd.h"/>
+         <F N="src/trunk/include/lpc214x.h"/>
+         <F N="src/trunk/lib/memb.h"/>
+         <F N="src/trunk/arch/lpc21xx/mmc/mmc.h"/>
+         <F N="src/trunk/arch/lpc21xx/enc28j60/network.h"/>
+         <F N="src/trunk/arch/lpc21xx/uart/print.h"/>
+         <F N="src/trunk/uip/psock.h"/>
+         <F N="src/trunk/uip/pt.h"/>
+         <F N="src/trunk/apps/simple/simple.h"/>
+         <F N="src/trunk/arch/lpc21xx/spi_eth/spi.h"/>
+         <F N="src/trunk/arch/lpc21xx/spi1/spi1.h"/>
+         <F N="src/trunk/include/syscalls.h"/>
+         <F N="src/trunk/fat/sysdefs.h"/>
+         <F N="src/trunk/arch/lpc21xx/timer/timer-arch.h"/>
+         <F N="src/trunk/uip/timer.h"/>
+         <F N="src/trunk/include/trace.h"/>
+         <F N="src/trunk/include/type.h"/>
+         <F N="src/trunk/arch/lpc21xx/uart/uart0.h"/>
+         <F N="src/trunk/include/uip-conf.h"/>
+         <F N="src/trunk/uip/uip-fw.h"/>
+         <F N="src/trunk/uip/uip-neighbor.h"/>
+         <F N="src/trunk/uip/uip-split.h"/>
+         <F N="src/trunk/uip/uip.h"/>
+         <F N="src/trunk/uip/uip_arch.h"/>
+         <F N="src/trunk/uip/uip_arp.h"/>
+         <F N="src/trunk/uip/uiplib.h"/>
+         <F N="src/trunk/uip/uipopt.h"/>
+         <F N="src/trunk/apps/webserver/webserver.h"/>
+      </Folder>
+      <Folder
+         Name="Resource Files"
+         Filters="*.ico;*.cur;*.dlg"/>
+      <Folder
+         Name="Bitmaps"
+         Filters="*.bmp"/>
+      <Folder
+         Name="Other Files"
+         Filters=""/>
+   </Files>
+</Project>
