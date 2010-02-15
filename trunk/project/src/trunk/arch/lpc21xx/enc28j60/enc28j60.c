@@ -150,8 +150,7 @@ uint16_t enc28j60_read16(uint8_t address)
 
 void enc28j60_init(void)
 {
-    uint32_t waits, timeout;
-    unsigned char i;
+    uint32_t waits;
 
     // Init busywait mechanism
     busywaitInit();
@@ -359,7 +358,7 @@ void flash_leds(int t)
 {
     // Flash leds
     int i;
-    for(i = 0; i < times; i++)
+    for(i = 0; i < t; i++)
     {
 	// OFF
 	enc28j60_phy_write(PHLCON, 0x3990);
