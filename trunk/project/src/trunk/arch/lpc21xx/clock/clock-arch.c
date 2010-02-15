@@ -41,7 +41,7 @@
 #include "clock-arch.h"
 #include "type.h"
 
-uint32_t tick;
+uint64_t tick;
 
 
 void clock_init(void);

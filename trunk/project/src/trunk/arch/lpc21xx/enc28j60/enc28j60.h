@@ -261,15 +261,15 @@
 
 // buffer boundaries applied to internal 8K ram
 // entire available packet buffer space is allocated
-//#define TXSTART_INIT   	0x0000	// start TX buffer at 0
-//#define RXSTART_INIT   	0x0600	// give TX buffer space for one full ethernet frame (~1500 bytes)
-//#define RXSTOP_INIT    	0x1FFF	// receive buffer gets the rest
-//#define MAX_FRAMELEN	        1518	// maximum ethernet frame length
+#define TXSTART_INIT   	0x0000	// start TX buffer at 0
+#define RXSTART_INIT   	0x0600	// give TX buffer space for one full ethernet frame (1536 bytes)
+#define RXSTOP_INIT    	0x1FFF	// receive buffer gets the rest
+#define MAX_FRAMELEN	1518	// maximum ethernet frame length
 
-#define RXSTART_INIT        0	// give TX buffer space for one full ethernet frame (~1500 bytes)
-#define RXSTOP_INIT    	    0x1A00	// receive buffer gets the rest
-#define TXSTART_INIT   	    0x1A01	// start RX buffer at 0
-#define	MAX_FRAMELEN	    1518	// maximum ethernet frame length
+//#define RXSTART_INIT        0	// give TX buffer space for one full ethernet frame (~1500 bytes)
+//#define RXSTOP_INIT    	    0x1A00	// receive buffer gets the rest
+//#define TXSTART_INIT   	    0x1A01	// start RX buffer at 0
+//#define	MAX_FRAMELEN	    1518	// maximum ethernet frame length
 
 // Ethernet constants
 #define ETHERNET_MIN_PACKET_LENGTH	0x3C

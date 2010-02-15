@@ -30,6 +30,7 @@
  */
 #include "network.h"
 #include "enc28j60.h"
+#include "debug.h"
 
 void network_init(void)
 {
