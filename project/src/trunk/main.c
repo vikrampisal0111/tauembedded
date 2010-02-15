@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <fcntl.h>
 
 #include "debug.h"
 #include "type.h"
@@ -22,7 +21,7 @@
 #define MSG_UIP_LOG	MSG_INFO
 
 
-DEFINE_pmesg_level(MSG_INFO);
+DEFINE_pmesg_level(MSG_DEBUG_MORE);
 
 void uip_log(char *m)
 {
@@ -50,6 +49,7 @@ void pmesg_hex(int level, uint8_t *buf, unsigned int len)
 int main(void)
 {
     unsigned int i;
+    uint64_t j;
     struct uip_eth_addr macaddr = { 
 	.addr = MY_MAC_ADDR
     };
@@ -57,8 +57,8 @@ int main(void)
     uip_ipaddr_t ipaddr;
     struct timer periodic_timer, arp_timer;
 
-    timer_set(&periodic_timer, CLOCK_SECOND / 2);
-    timer_set(&arp_timer, CLOCK_SECOND * 10);
+    timer_set(&periodic_timer, CLOCK_SECOND * 100);
+    timer_set(&arp_timer, CLOCK_SECOND * 1000);
 
     VPBDIV = 0x02;
 
@@ -68,7 +68,7 @@ int main(void)
     //open("uart0", O_WRONLY, 0777);
 
     // Testing file open interface
-    fopen("fatfs:/somefile", "r");
+    //fopen("fatfs:/somefile", "r");
 
     pmesg(MSG_INFO, "- Started Uart\n");
 
@@ -101,6 +101,9 @@ int main(void)
 
     while(1) {
 	uip_len = network_read(uip_buf);
+	if(j++ % 1000 == 0) {
+	    pmesg(MSG_INFO, "loop %ld\n", j);
+	}
 	if(uip_len > 0) 
 	{
 	    pmesg(MSG_DEBUG, "Got packet (len == %d)\n", uip_len);
@@ -133,9 +136,11 @@ int main(void)
 		    network_send(uip_buf, uip_len);
 		}
 	    }
-	} 
+	}
+#if 0	
 	else if(timer_expired(&periodic_timer)) 
 	{
+	    pmesg(MSG_DEBUG, "Timer expired: periodic timer (%d)\n", periodic_timer.start);
 	    timer_reset(&periodic_timer);
 	    for(i = 0; i < UIP_CONNS; i++) 
 	    {
@@ -150,28 +155,15 @@ int main(void)
 		}
 	    }
 
-#if UIP_UDP
-	    for(i = 0; i < UIP_UDP_CONNS; i++) 
-	    {
-		uip_udp_periodic(i);
-		/* If the above function invocation resulted in data that
-		   should be sent out on the network, the global variable
-		   uip_len is set to a value > 0. */
-		if(uip_len > 0) 
-		{
-		    uip_arp_out();
-		    network_send(uip_buf, uip_len);
-		}
-	    }
-#endif /* UIP_UDP */
-
 	    /* Call the ARP timer function every 10 seconds. */
 	    if(timer_expired(&arp_timer)) 
 	    {
+		pmesg(MSG_DEBUG, "Timer expired: arp timer (%d)\n", arp_timer.start);
 		timer_reset(&arp_timer);
 		uip_arp_timer();
 	    }
 	}
+#endif
     } // while(1)
 
     return 0;

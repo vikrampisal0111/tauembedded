@@ -4,9 +4,7 @@
 # Prove we started from main Makefile
 export STARTEDATTOP=true
 
-LPC2148_OPTS=-DUART0_DEBUG
-
-#SUBDIRS = arch/lpc21xx/uart arch/lpc21xx/enc28j60 arch/lpc21xx/spi_eth lib uip arch/lpc21xx/timer arch/lpc21xx/clock apps/hello-world
+LPC2148_OPTS=-DUART0_DEBUG -DCLOCK_CONF_SECOND=1000 -DTRACE
 
 SUBDIRS =
 # arch
@@ -30,7 +28,9 @@ SUBDIRS += apps/webserver
 #TARGET = main
 #TARGET = fat_test
 #TARGET = mmc_test
+
 TARGET = fserv_test
+
 SRC = $(TARGET).c syscalls.c debug.c fatfs.c
 
 ASRC=startup.S
@@ -91,7 +91,7 @@ WARNINGS = -Wall
 #WARNINGS += -Wunused
 export WARNINGS
 
-CFLAGS += -Wall
+CFLAGS += $(WARNINGS)
 CFLAGS += $(INCLUDES) 
 CFLAGS += $(BASEINCLUDE)
 CFLAGS += -mcpu=arm7tdmi 

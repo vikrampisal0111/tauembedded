@@ -36,20 +36,15 @@ Advairtizer V1.0
 www.braintechnology.de
 */
 
-//
-//#include <global.h>
-//#include <uip/uip.h>
-//#include <uip/uip_arp.h>
-//#include <uip/timer.h>
-
-//#include "peripherals.h"
 #include <stdio.h>
 #include "type.h"
+
 #include "trace.h"
+#include "debug.h"
+
 #include "lpc214x.h"
 
 #include "busywait.h"
-//#include "irq.h"
 #include "../spi_eth/spi.h"
 #include "enc28j60.h"
 
@@ -162,27 +157,23 @@ void enc28j60_init(void)
     busywaitInit();
 
     IODIR0 |= (1 << CS_ETHERNET);
-    TRACE("Chip select pin dir init\n");
+    pmesg(MSG_DEBUG, "Chip select pin dir init\n");
 
     IODIR0 |= ( 1 << RESET_ETHERNET);
-    TRACE("Reset pin dir init\n");
+    pmesg(MSG_DEBUG, "Reset pin dir init\n");
 
     //  Set up the reset line.  This isn't done in the SPI code, because it
     //  doesn't need to be aware of the ENC28J60 reset.  Do it first so we
     //  can hold the part in reset before SPI initialization.
     //
     ETH_RESET_LOW();
-    TRACE("RESET_LOW");
+    pmesg(MSG_DEBUG, "RESET_LOW\n");
 
     IODIR0 &= ~(1 << INTR_ETHERNET);
-    TRACE("Interrupt pin dir init\n");
+    pmesg(MSG_DEBUG, "Interrupt pin dir init\n");
 
     ETH_SPI_INIT();
-    TRACE("SPI init\n");
-    //fflush(stdout);
-    //
-    //  Now hold part in reset for 100ms
-    //
+    pmesg(MSG_DEBUG, "SPI init\n");
 
 //    TRACE("Holding in reset for ~100ms");
 //    ETH_CS_HIGH();
@@ -200,7 +191,6 @@ void enc28j60_init(void)
 
     ETH_RESET_HIGH();
     ETH_CS_HIGH();
-    //
     //  Give the part 1 second for the PHY to become ready (CLKRDY == 1).  If it
     //  doesn't, return an error to the user. 
     //
@@ -210,12 +200,13 @@ void enc28j60_init(void)
     //  high.  If we only checked the CLKRDY, it will likely return 1 for when no
     //  ENC28J60 is present.
     //
+    pmesg(MSG_DEBUG, "Waiting for phy to become ready\n");
     waits = 0;
     while ( ((enc28j60_read(ESTAT) & (ESTAT_UNIMP | ESTAT_CLKRDY)) != ESTAT_CLKRDY) )
     {
 	if(waits >= 10)
 	{
-	    TRACE("PHY ERROR !");
+	    pmesg(MSG_CRIT, "PHY ERROR !\n");
 	    return;
 	}
 	waits++;
@@ -223,7 +214,7 @@ void enc28j60_init(void)
     }
     waits = 0;
     //fflush(stdout);
-    TRACE("Ended");
+    pmesg(MSG_DEBUG, "phy wait ended");
     //fflush(stdout);
 
     // Soft reset
@@ -234,12 +225,16 @@ void enc28j60_init(void)
     busywait(20 * MS2MICROSEC);
 
     // Perform system reset
-    enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, ECON2, ECON2_PWRSV);//wake up
+    //    Wake up
+    enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, 
+	    ECON2, 
+	    ECON2_PWRSV);
+    //    Reset
     //enc28j60_write_op(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
 
     // According to Errata workaround #2, CLKRDY check is unreliable, delay 20ms instead
     busywait(20 * MS2MICROSEC);
-    TRACE("System Soft Reset");
+    pmesg(MSG_DEBUG, "System Soft Reset\n");
 #if 0
     for(i = 0; i < 10; i++)
     {
@@ -248,8 +243,14 @@ void enc28j60_init(void)
 	TRACE("ended");
     }
 #endif
+
+    // Automatically increment ERDPT or EWRPT on reading from or writing to EDATA
+    enc28j60_write_op(ENC28J60_BIT_FIELD_SET,
+	    ECON2,
+	    ECON2_AUTOINC);
+
     // Do Bank 0 stuff
-    TRACE("Initializing Bank 0");
+    pmesg(MSG_DEBUG, "Initializing Bank 0\n");
 
     // initialize receive buffer
     // 16-bit transfers, must write low byte first
@@ -268,7 +269,7 @@ void enc28j60_init(void)
     enc28j60_write16(ETXSTL, TXSTART_INIT);
 
     // Do Bank 2 stuff
-    TRACE("Initializing Bank 2");
+    pmesg(MSG_DEBUG, "Initializing Bank 2\n");
 
     // Bring MAC out of reset
     enc28j60_write(MACON2, 0x00);
@@ -307,7 +308,7 @@ void enc28j60_init(void)
     enc28j60_write16(MAMXFLL, MAX_FRAMELEN);
 
     // Do Bank 3 stuff
-    TRACE("Bank 3 initialization");
+    pmesg(MSG_DEBUG, "Bank 3 initialization\n");
 
     // Set Mac Addr, MAC address in ENC28J60 is byte-backward
     {
@@ -324,25 +325,6 @@ void enc28j60_init(void)
     // No loopback of transmitted frames
     //enc28j60_phy_write(PHCON2, PHCON2_HDLDIS);
 
-    // Read a PHY register
-    TRACE("PHHID1==%x", enc28j60_phy_read(PHHID1));
-
-#if 0
-    // Flash leds
-    int i;
-    for(i = 0; i < 10; i++)
-    {
-	// OFF
-	enc28j60_phy_write(PHLCON, 0x3990);
-	busywait(1000 * MS2MICROSEC);
-
-	// ON
-	enc28j60_phy_write(PHLCON, 0x3880);
-	busywait(1000 * MS2MICROSEC);
-    }
-    enc28j60_phy_write(PHLCON, 0x472);//Display link status and transmit/receive activity (always stretched)
-#endif
-
     // Enable interrutps
     //   EIE: ETHERNET INTERRUPT ENABLE REGISTER
     //	    PKTIE: Receive Packet Pending Interrupt Enable bit
@@ -350,6 +332,18 @@ void enc28j60_init(void)
     enc28j60_write_op(ENC28J60_BIT_FIELD_SET,
 	    EIE,
 	    EIE_INTIE | EIE_PKTIE);
+
+    // Clear the Receive Error Interrupt Flag bit 
+    // Set whenever a packet is dropped due to insufficient buffer space
+    // or the packet count is 255
+    enc28j60_write_op(ENC28J60_BIT_FIELD_CLR,
+	    EIR,
+	    EIR_RXERIF);
+
+    // Disable Receive Error Interrupt (To enable polling of RXERIF)
+    enc28j60_write_op(ENC28J60_BIT_FIELD_CLR,
+	    EIE,	    
+	    EIE_RXERIE);
 
     // Enable packet reception
     enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_RXEN);
@@ -360,11 +354,30 @@ void enc28j60_init(void)
     enc28j60_write(ERXFCON,0);//(CRCEN|ANDOR)); // Bank 1
 }
 
+// Flash leds 't' number of times
+void flash_leds(int t) 
+{
+    // Flash leds
+    int i;
+    for(i = 0; i < times; i++)
+    {
+	// OFF
+	enc28j60_phy_write(PHLCON, 0x3990);
+	busywait(1000 * MS2MICROSEC);
+
+	// ON
+	enc28j60_phy_write(PHLCON, 0x3880);
+	busywait(1000 * MS2MICROSEC);
+    }
+    
+    //Display link status and transmit/receive activity (always stretched)
+    enc28j60_phy_write(PHLCON, 0x472);
+}
+
 uint8_t  enc28j60_read_op(uint8_t op, uint8_t address)
 {
 
     uint8_t data;
-    /* assert CS*/
     ETH_CS_LOW();
 
     ETH_SPI( op | (address & ADDR_MASK));
@@ -380,7 +393,6 @@ uint8_t  enc28j60_read_op(uint8_t op, uint8_t address)
 
 void enc28j60_write_op(uint8_t op, uint8_t address, uint8_t data)
 {
-    /* assert CS*/
     ETH_CS_LOW();
 
     // issue write command
@@ -389,8 +401,7 @@ void enc28j60_write_op(uint8_t op, uint8_t address, uint8_t data)
     // write data
     ETH_SPI(data);
 
-    // release CS
-    ETH_CS_HIGH();//CS auf High
+    ETH_CS_HIGH();
 }
 
 void enc28j60_set_bank(uint8_t address)
@@ -443,12 +454,12 @@ void enc28j60_phy_write(uint8_t address, uint16_t data)
     // write the PHY data
     enc28j60_write16(MIWRL, data);
     //enc28j60_write(MIWRH, data>>8);
-    TRACE("wait phy write");
+    pmesg(MSG_DEBUG_MORE, "wait phy write\n");
     // wait until the PHY write completes
     r = enc28j60_read(MISTAT);
     //TRACE("r=%x", r);
     while(r & MISTAT_BUSY);
-    TRACE("wait phy write complete");
+    pmesg(MSG_DEBUG_MORE, "wait phy write complete\n");
 }
 
 uint16_t enc28j60_phy_read(uint8_t address) {
@@ -471,8 +482,8 @@ uint16_t enc28j60_phy_read(uint8_t address) {
 
 void enc28j60_get_mac_address(uint8_t *macaddr)
 {
-    // read MAC address registers
-    // NOTE: MAC address in ENC28J60 is byte-backward
+    // Read MAC address registers
+    // MAC address in ENC28J60 is byte-backward
     *macaddr++ = enc28j60_read(MAADR5);
     *macaddr++ = enc28j60_read(MAADR4);
     *macaddr++ = enc28j60_read(MAADR3);
@@ -483,28 +494,24 @@ void enc28j60_get_mac_address(uint8_t *macaddr)
 
 void enc28j60_write_buffer(uint32_t len, uint8_t * data)
 {
-    // assert CS
-    ETH_CS_LOW(); //CS auf Low
+    ETH_CS_LOW();
 
-    //   	pause(ONE_US*100);
-    //	// issue write command
+    // Issue write command
     ETH_SPI(ENC28J60_WRITE_BUF_MEM);
     while(len--)
     {
 	// write data
 	ETH_SPI(*data++);
     }
-    // release CS
+
     ETH_CS_HIGH();
 }
 
 void enc28j60_read_buffer(uint32_t len, uint8_t *data)
 {
-    // assert CS
-    ETH_CS_LOW(); //CS auf Low
+    ETH_CS_LOW();
 
-    // pause(ONE_US*100);
-    // issue read command
+    // Issue read command
     ETH_SPI(ENC28J60_READ_BUF_MEM);
     while(len--)
     {
@@ -512,17 +519,21 @@ void enc28j60_read_buffer(uint32_t len, uint8_t *data)
 	*data++ =ETH_SPI(0);
     }
 
-    // release CS
     ETH_CS_HIGH();
 }
 
 
 void enc28j60_packet_send(uint32_t len, uint8_t *packet)
 {
-    // Errata sheet
+    // Errata sheet Rev.5B
+#ifdef ETH_HALF_DUPLEX
+    // 10. Transmit logic (Half Duplex)
+    // Clear and set TXRST
     enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRST);
     enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, ECON1, ECON1_TXRST);
+    // Clear interrupt flags which may rise because of TXRST reset
     enc28j60_write_op(ENC28J60_BIT_FIELD_CLR, EIR, EIR_TXERIF | EIR_TXIF);
+#endif
 
     // Set the write pointer to start of transmit buffer area
     enc28j60_write16(EWRPTL, TXSTART_INIT);
@@ -532,14 +543,18 @@ void enc28j60_packet_send(uint32_t len, uint8_t *packet)
     enc28j60_write16(ETXSTL, TXSTART_INIT); 
     enc28j60_write16(ETXNDL, (TXSTART_INIT + len));
 
-    // write per-packet control byte
-    enc28j60_write_op(ENC28J60_WRITE_BUF_MEM, 0, 0x00);
+    // Write per-packet control byte
+    //   Control Byte == 0x0 means that values in MACON3 
+    //   will be used to determine how the packet will be transmitted
+    enc28j60_write_op(ENC28J60_WRITE_BUF_MEM, 0, 0x0);
 
-    // copy the packet into the transmit buffer
+    // Copy the packet into the transmit buffer
     enc28j60_write_buffer(len, packet);
 
-    // send the contents of the transmit buffer onto the network
-    enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_TXRTS);
+    // Send the contents of the transmit buffer onto the network
+    enc28j60_write_op(ENC28J60_BIT_FIELD_SET, 
+	    ECON1, 
+	    ECON1_TXRTS);
 }
 
 
@@ -549,38 +564,40 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
     uint16_t len;
 
     //  Sanity check that at least one full packet is present
-    if( !enc28j60_read(EPKTCNT) )
+    if( !enc28j60_read(EPKTCNT) ) {
+	//pmesg(MSG_CRIT, "No full packets present\n");
 	return 0;
+    }
+
+    if( enc28j60_read(EIR) & EIR_RXERIF) {
+	pmesg(MSG_CRIT, "A packet was aborted because there is insufficient buffer space or the packet count is 255\n");
+    }
 
     // Set the read pointer to the start of the received packet
+    // XXX: Replaced by AUTOINC - Seems that still needed
     enc28j60_write16(ERDPTL, NextPacketPtr);
-    //enc28j60_write(ERDPTH, (NextPacketPtr)>>8);
 
     // read the next packet pointer
     NextPacketPtr  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
-    NextPacketPtr |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0)<<8;
+    NextPacketPtr |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0) << 8;
 
-    //
     //  Sanity check
-    //
-#define RXEND         0x1fff
-    if (NextPacketPtr > RXEND)
+    if (NextPacketPtr > RXSTOP_INIT)
     {
+	pmesg(MSG_CRIT, "NextPacketPtr > RXEND : Sanity check failed (NextPacketPtr == %x)\n", NextPacketPtr);
 	enc28j60_init();
 	return 0;
     }
 
-    // read the packet length
+    // Receive status
+    //    Read packet length (Little Endian)
     len  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
     len |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0) << 8;
-
-    // read the receive status (ignored)
+    //    Read rest of the receive status (ignored)
     rxstat  = enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
     rxstat |= enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0) << 8;
 
-    //
     //  If the frame is too big to handle, throw it away
-    //
     if (len > maxlen)
     {
 	int u;
@@ -588,22 +605,16 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 	{
 	    enc28j60_read_op(ENC28J60_READ_BUF_MEM, 0);
 	}
-	TRACE("ERROR: Packet too big to handle");
+	pmesg(MSG_CRIT, "Packet too big to handle (len == %d)\n", len);
 	return 0;
     }
-
-    // limit retrieve length
-    // Still needed ??? (MichaelG)
-    len = IFMIN(len, maxlen);
-    //TRACE("len=%d maxlen=%d", len, maxlen);
 
     // copy the packet from the receive buffer
     enc28j60_read_buffer(len, packet);
 
     // Move the RX read pointer to the start of the next received packet
     // This frees the memory we just read out
-    enc28j60_write16(ERXRDPTL, (NextPacketPtr));
-    //enc28j60_write(ERXRDPTH, (NextPacketPtr)>>8);
+    enc28j60_write16(ERXRDPTL, NextPacketPtr); 
 
     // Errata workaround #13. Make sure ERXRDPT is odd
     if (1) {
@@ -615,13 +626,15 @@ unsigned int enc28j60_packet_receive(uint32_t maxlen, uint8_t *packet)
 	    enc28j60_write16(ERXRDPTL, (re));
 	}
 	else {
-	    enc28j60_write16(ERXRDPTL, (NextPacketPtr-1));
+	    enc28j60_write16(ERXRDPTL, (NextPacketPtr - 1));
 	}
     }
 
     // decrement the packet counter indicate we are done with this packet
-    // clear the PKTIF: Receive Packet Pending Interrupt Flag bit
-    enc28j60_write_op(ENC28J60_BIT_FIELD_SET, ECON2, ECON2_PKTDEC);
+    // if EPKTCNT is 0 PKTIF (Receive Packet Pending Interrupt Flag bit) is cleared automatically 
+    enc28j60_write_op(ENC28J60_BIT_FIELD_SET, 
+	    ECON2, 
+	    ECON2_PKTDEC);
 
     // Reduce the MAC-reported length by 4 to remove the CRC
     return len - 4;

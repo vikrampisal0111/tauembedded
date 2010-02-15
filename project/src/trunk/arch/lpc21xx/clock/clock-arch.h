@@ -38,6 +38,6 @@
 
 typedef unsigned int clock_time_t;
 
-#define CLOCK_CONF_SECOND 100
+#define CLOCK_CONF_SECOND 1000
 
 #endif /* __CLOCK_ARCH_H__ */
