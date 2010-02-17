@@ -1,0 +1,24 @@
+
+
+ Problems and Solutions
+------------------------
+
+1. Set relevant jumpers to SPI0 for ethernet
+2. Make sure to use the pins really connected to RESET and Chip Select of enc28j60 (P0.13, P0.12) and not the SPI slave select pin.
+3. The default in my version of gnuarm is 32 alignment of structs (maybe of everything else as well). 
+   So special care must be taken with structs which have several data types.
+   For example:
+
+   struct test_t {
+       uint8_t x;
+   };
+   struct test_t a1;
+   sizeof(a1) == 4
+
+   On the other hand:
+   
+   struct test_packed_t {
+        uint8_t x;
+   } __attribute__((packed));
+   struct test_packed_t a2;
+   sizeof(a2) == 1
