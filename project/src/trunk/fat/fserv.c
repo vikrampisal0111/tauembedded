@@ -11,7 +11,7 @@ static char html_head[] = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//E
 
 static char html_dir[] = "<h1>Index of %s</h1>\n";
 
-static char html_elem[] = "<ul><li><a href=\"%s\"> %s</a></li></ul>\n";
+static char html_elem[] = "<ul><li><a href=\"%s/%s\"> %s</a></li></ul>\n";
 
 static char html_foot[] = "</body></html>\n";
 
@@ -44,15 +44,18 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, WORD* byteSize)
    
    // Check if root dir.   
    if (!strcmp(path, "/")) {
-      pmesg(MSG_DEBUG, "fserv: root directory info queried\n");
+      constructFsPath("/");
+      pmesg(MSG_INFO, "fserv: root directory info queried\n");
       if (elemType != NULL)
          *elemType = FSERV_DIR;
+      if (byteSize != NULL)
+         *byteSize = 2048; // Constant buffer size.
       return FR_OK;
    }
 
    constructFsPath(path);
 
-   pmesg(MSG_DEBUG, "fserv: Full path = %s\n", fspath);
+   pmesg(MSG_INFO, "fserv: Full path = %s\n", fspath);
 
    // Get element type.
    fsres = f_stat(fspath, &inf);
@@ -75,7 +78,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, WORD* byteSize)
    {
       type = FSERV_DIR;
       //TODO: size for directory can be irrelevant, maybe need to check size in # of files.
-      bytes = inf.fsize;
+      bytes = 2048; // 19.2.10 - fixed 2KB size (as max buffer size)
    }
    else
    {
@@ -113,7 +116,7 @@ FRESULT fsDirContentHtml(DIR *dirObj, const char* dirpath, char* dataBuff)
       i = dirObj->index;
       fsres = f_readdir(dirObj, &inf);      
       if (i != dirObj->index) {
-         sprintf(dataBuff+strlen(dataBuff), html_elem, inf.fname, inf.fname);
+         sprintf(dataBuff+strlen(dataBuff), html_elem, dirpath, inf.fname, inf.fname);
       }
 
    } while (i != dirObj->index);
@@ -128,8 +131,10 @@ FRESULT fsDirContentHtml(DIR *dirObj, const char* dirpath, char* dataBuff)
 
 }
 
+char dir_list_buffer[2*1024];
 
-FRESULT fsGetElementData(const char* path, char* dataBuff)
+FRESULT fsGetElementData(const char* path, char* dataBuff, 
+int offset, int bytesToRead)
 {
    FRESULT fsres = FR_OK;
    FIL file;   
@@ -145,14 +150,18 @@ FRESULT fsGetElementData(const char* path, char* dataBuff)
    switch (type)
    {
    case FSERV_FILE:      
-
       fsres = f_open(&file, fspath, FA_READ);
+      pmesg(MSG_INFO, "serving file\n");
       if (fsres != FR_OK) 
       {
          return fsres;
       }      
+
+      fsres = f_lseek(&file, offset);
+
+      if (fsres) return FR_RW_ERROR; 
    
-      fsres = f_read(&file, dataBuff, byteSize, &bytesRead);
+      fsres = f_read(&file, dataBuff, bytesToRead, &bytesRead);
 
       if (byteSize != bytesRead)
       {
@@ -166,14 +175,23 @@ FRESULT fsGetElementData(const char* path, char* dataBuff)
       
       break;
    case FSERV_DIR:
-      
-      fsres = f_opendir(&dir, fspath);
 
-      if (fsres) return fsres;
-      
-      fsres = fsDirContentHtml(&dir, path, dataBuff);
+      if (offset == 0)
+      {      
+      	fsres = f_opendir(&dir, fspath);
+        pmesg(MSG_INFO, "serving directory %s\n", fspath);
 
-      if (fsres) return fsres;
+      	if (fsres) return fsres;
+      
+        printf("start build html\n");
+      	fsres = fsDirContentHtml(&dir, path, dir_list_buffer);
+        
+      	if (fsres) return fsres;
+        printf("build html: *** \n\n %s ***\n\n", dir_list_buffer);
+      }
+      printf("\nlist offset = %d, bytes to read = %d\n", offset, bytesToRead);
+//finally copy partial list info into buffer.
+      memcpy(dataBuff, dir_list_buffer + offset, bytesToRead);
 
       break;      
    case FSERV_NONEXSIT:
