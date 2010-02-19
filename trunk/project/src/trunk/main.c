@@ -10,6 +10,8 @@
 #include "uip.h"
 #include "uip_arp.h"
 #include "timer.h"
+#include "fserv.h"
+
 
 // Applications
 //#include "hello-world.h"
@@ -20,8 +22,7 @@
 #define MY_MAC_ADDR	{ 0x00, 0xf8, 0xc1, 0xd8, 0xc7, 0xa6} 
 #define MSG_UIP_LOG	MSG_INFO
 
-
-DEFINE_pmesg_level(MSG_DEBUG_MORE);
+DEFINE_pmesg_level(MSG_INFO);
 
 void uip_log(char *m)
 {
@@ -63,6 +64,8 @@ int main(void)
     VPBDIV = 0x02;
 
     fopen("uart0", "w");
+
+	fsInit(); //init fileserver module.
 
     //Regular open does not work...
     //open("uart0", O_WRONLY, 0777);
