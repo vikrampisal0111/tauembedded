@@ -34,7 +34,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, WORD* byteSize)
    out: fs element data will be written to buffer container
    retval: operation status
 */
-FRESULT fsGetElementData(const char* path, char* dataBuff);
+FRESULT fsGetElementData(const char* path, char* dataBuff, int offset, int bytesToRead);
 
 #endif // _FSERV_H__
 
