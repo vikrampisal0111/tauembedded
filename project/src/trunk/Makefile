@@ -20,16 +20,17 @@ SUBDIRS += lib
 SUBDIRS += uip 
 SUBDIRS += fat
 
-SUBDIRS += apps/webserver
+SUBDIRS += apps/sdserver
+#SUBDIRS += apps/webserver
 #SUBDIRS += apps/hello-world
 #SUBDIRS += apps/simple
 
 
-#TARGET = main
+TARGET = main
 #TARGET = fat_test
 #TARGET = mmc_test
 
-TARGET = fserv_test
+#TARGET = fserv_test
 
 SRC = $(TARGET).c syscalls.c debug.c fatfs.c
 
@@ -50,6 +51,7 @@ INCLUDES = -I/usr/include
 
 INCLUDES += -I$(ROOT)/lib 
 INCLUDES += -I$(ROOT)/uip 
+INCLUDES += -I$(ROOT)/fat
 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/spi1 
 INCLUDES += -I$(ROOT)/arch/lpc21xx/spi_eth 
