@@ -64,7 +64,8 @@ INCLUDES += -I$(ROOT)/arch/lpc21xx/clock
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
 # apps
-INCLUDES += -I$(ROOT)/apps/webserver
+INCLUDES += -I$(ROOT)/apps/sdserver
+#INCLUDES += -I$(ROOT)/apps/webserver
 #INCLUDES += -I$(ROOT)/apps/hello-world 
 #INCLUDES += -I$(ROOT)/apps/simple
 
@@ -148,7 +149,7 @@ LPC21ISP = lpc21isp
 LPC21ISP_BAUD = 19200
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
-LPC21ISP_PORT = /dev/ttyUSB0
+LPC21ISP_PORT = /dev/ttyUSB1
 # enter bootloader via RS232 DTR/RTS (only if hardware supports this feature - see Philips AppNote):
 LPC21ISP_CONTROL = -control
 
@@ -156,6 +157,10 @@ LPC21ISP_CONTROL = -control
 program: bin
 	$(LPC21ISP) -term $(LPC21ISP_CONTROL) $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 	@echo "Download done."
+
+.PHONY: terminal
+terminal:
+	$(LPC21ISP) -termonly $(LPC21ISP_DEBUG) $(LPC21ISP_FLASHFILE) $(LPC21ISP_PORT) $(LPC21ISP_BAUD) $(LPC21ISP_XTAL)
 
 # Create final output file (.hex) from ELF output file.
 %.hex: %.elf
