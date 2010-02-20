@@ -50,7 +50,7 @@
 #define lcd_rw_set() (IOSET0 = RW)
 #define lcd_rw_clear() (IOCLR0 = RW)
 
-void busywait(uint64_t microseconds)
+void lcdbusywait(uint64_t microseconds)
 {
 	volatile uint64_t i = 0;
 	uint64_t endLoop = microseconds * 60;
@@ -73,27 +73,27 @@ void read8(int *busy, int *address) {
 	lcd_data8_in();
 
 	/* Clock setup time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_set();
 
 	/* Data output delay time */
-	busywait(2);
+	lcdbusywait(2);
 
 	int bits = lcd_data8_read();
 	*busy = (bits & DB7) != 0;
 	*address = ((bits & ALL & ~DB7) >> 16);
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	/* Cycle time */
-	busywait(1);
+	lcdbusywait(1);
 }
 
 void read4(int *busy, int *address) 
@@ -104,43 +104,43 @@ void read4(int *busy, int *address)
 	lcd_data4_in();
 
 	/* Clock setup time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_set();
 
 	/* Data output delay time */
-	busywait(2);
+	lcdbusywait(2);
 
 	int bits = lcd_data4_read();
 	*busy = (bits & DB7) != 0;
 	*address = ((bits & ALL4 & ~DB7) >> 16);
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_set();
 
 	/* Data output delay time */
-	busywait(2);
+	lcdbusywait(2);
 
 	bits = lcd_data4_read();
 	*address = ((bits & ALL4) >> 20);
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	/* Cycle time */
-	busywait(1);	
+	lcdbusywait(1);	
 }
 
 void pollBusyBit()
@@ -165,21 +165,21 @@ void generic_set8(int bits)
 	lcd_data8_out();
 
 	/* Clock setup time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_data8_set(bits);
 	lcd_en_set();
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	/* Cycle time */
-	busywait(1);
+	lcdbusywait(1);
 
 	pollBusyBit();
 }
@@ -189,32 +189,32 @@ void generic_set4(int bits)
 	lcd_data4_out();
 
 	/* Clock setup time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_data4_set(bits);
 	lcd_en_set();
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data Hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_data4_set(bits << 4);
 	lcd_en_set();
 
 	/* Clock pulse width */
-	busywait(1);
+	lcdbusywait(1);
 
 	lcd_en_clear();
 
 	/* Data Hold time */
-	busywait(1);
+	lcdbusywait(1);
 
 	/* Cycle time */
-	busywait(1);
+	lcdbusywait(1);
 
 	pollBusyBit();
 }
@@ -293,11 +293,11 @@ void lcdPrintString(char *str)
 
 	if ((tok > 16) || (strlen(str) - tok > 16))
 	{
-		busywait(10000);
+		lcdbusywait(10000);
 		for (int j = 0; j < max(strlen(str) - tok - 16, tok - 16); j++)
 		{
 			inst(0x18);
-			busywait(1000);
+			lcdbusywait(1000);
 		}
 
 	}
@@ -318,6 +318,10 @@ void set_bitmode(int mode)
 	g_is8bit = (mode == 8);
 }
 
+void lcdClearScreen()
+{
+	inst(0x01); 
+}
 
 void lcdInit() 
 {
@@ -333,7 +337,7 @@ void lcdInit()
 	inst(0x0F);
 
 	/* Clear Screen*/ 
-	inst(0x01);
+	lcdClearScreen();
 
 	/* Increment */
 	inst(0x06);
