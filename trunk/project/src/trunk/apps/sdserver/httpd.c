@@ -80,7 +80,6 @@
 static unsigned short generate_part_of_file(void *state)
 {
     struct httpd_state *s = (struct httpd_state *)state;
-    char *fname;
 
     if(s->file.len > uip_mss()) {
 	s->len = uip_mss();
@@ -91,9 +90,8 @@ static unsigned short generate_part_of_file(void *state)
 
 //    memcpy(uip_appdata, s->file.data, s->len);
         
-    fname = (s->file.root)?("/"):(s->filename);
-
-    fsGetElementData(fname, uip_appdata, s->file.offset, s->len);
+printf("\ncall GetElementData with fname=%s, offset=%d, len=%d\n",s->filename,s->file.offset,s->len);
+    fsGetElementData(s->filename, uip_appdata, s->file.offset, s->len);
     s->file.offset += s->len;
     
 
@@ -230,7 +228,6 @@ static PT_THREAD(handle_output(struct httpd_state *s))
     char *ptr;
     FRESULT fres;
     char *fname = s->filename;
-    s->file.root = 0;
     PT_BEGIN(&s->outputpt);
 printf("\nhandle_output state filename = %s\n", fname);
       
@@ -244,13 +241,13 @@ printf("\nhandle_output state filename = %s\n", fname);
         {
 		if (s->file.type == FSERV_NONEXSIT)
                 { printf("info: recognized root dir trying to change\n");
-                    s->file.root = 1;
+		    strcpy(s->filename,"/");
 		    fname = "/"; //root dir listing.
        		    fres = fsGetElementInfo(fname, &s->file.type, &s->file.len);
                 }
         }
 
-
+printf("fsres = %d\n", fres);
 	if (FSERV_NONEXSIT == s->file.type)
         {
 printf("file not found\n");	 
