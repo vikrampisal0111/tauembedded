@@ -1,5 +1,5 @@
 SRC_FILES = httpd.c http-strings.c httpd-fs.c httpd-cgi.c
-INCLUDES = -I../../uip 
+INCLUDES = -I../../uip -I../../fat
 #
 # Define all object files.
 #
