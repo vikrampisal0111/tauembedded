@@ -27,7 +27,7 @@ FRESULT fsInit();
    out: size in bytes
    retval: operation status
 */
-FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, WORD* byteSize);
+FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize);
 
 /* File server get element data.
    in: path to fs element, buffer to hold the data

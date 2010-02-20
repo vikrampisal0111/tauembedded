@@ -1,5 +1,7 @@
 #include "fserv.h"
 #include "debug.h"
+#include "lcd.h"
+
 // Simple html for directory listing from Apache2.2 server.
 // TODO: generate more decorated / informative documents.
 static char html_head[] = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"> \
@@ -22,6 +24,8 @@ FRESULT fsInit()
 {
    int r = SPI_Init();
 
+   lcdInit(); // init lcd display.
+
    if (r) return FR_NOT_READY;
    return f_mount(0, &fsdat);
 }
@@ -35,12 +39,12 @@ void constructFsPath(const char* path)
 }
 
 
-FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, WORD* byteSize)
+FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize)
 {
    FRESULT fsres;
    FILINFO inf;
    fsElemType type;
-   WORD bytes;
+   DWORD bytes;
    
    // Check if root dir.   
    if (!strcmp(path, "/")) {
@@ -147,7 +151,7 @@ int offset, int bytesToRead)
    FRESULT fsres = FR_OK;
    FIL file;   
    DIR dir;
-   WORD bytesRead, byteSize;
+   DWORD bytesRead, byteSize;
    fsElemType type;
 
    fsres = fsGetElementInfo(path, &type, &byteSize);
@@ -155,6 +159,8 @@ int offset, int bytesToRead)
    pmesg(MSG_DEBUG, "get element info result = %d\n", fsres);
    if (fsres) return fsres;
 
+   lcdClearScreen();
+   lcdPrintString(path);
    switch (type)
    {
    case FSERV_FILE:      
