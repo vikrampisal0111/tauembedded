@@ -25,6 +25,8 @@ void set_bitmode(int mode);
 
 void lcdInit();
 
+void lcdClearScreen();
+
 void busywait(uint64_t microseconds);
 
 #endif
