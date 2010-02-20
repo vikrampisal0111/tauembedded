@@ -20,7 +20,7 @@ void SPI_Init( void )
  
   portConfig = PINSEL1; 
   PINSEL1 = portConfig | 0x00A8; 
-  IODIR0 = SPI_SEL;  /* SSEL is output */ 
+  IODIR0 |= SPI_SEL;  /* SSEL is output */ 
   IOSET0 = SPI_SEL;  /* set SSEL to high */ 
       /* Set PCLK 1/2 of CCLK */ 
   VPBDIV = 0x02; 
