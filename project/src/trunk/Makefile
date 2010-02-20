@@ -15,6 +15,7 @@ SUBDIRS += arch/lpc21xx/spi1
 SUBDIRS += arch/lpc21xx/timer 
 SUBDIRS += arch/lpc21xx/clock 
 SUBDIRS += arch/lpc21xx/mmc
+SUBDIRS += arch/lpc21xx/lcd
 
 SUBDIRS += lib 
 SUBDIRS += uip 
@@ -149,7 +150,7 @@ LPC21ISP = lpc21isp
 LPC21ISP_BAUD = 19200
 LPC21ISP_XTAL = 12000
 LPC21ISP_FLASHFILE = $(TARGET).hex
-LPC21ISP_PORT = /dev/ttyUSB1
+LPC21ISP_PORT = /dev/ttyUSB0
 # enter bootloader via RS232 DTR/RTS (only if hardware supports this feature - see Philips AppNote):
 LPC21ISP_CONTROL = -control
 
