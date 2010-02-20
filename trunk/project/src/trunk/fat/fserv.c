@@ -11,7 +11,7 @@ static char html_head[] = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//E
 
 static char html_dir[] = "<h1>Index of %s</h1>\n";
 
-static char html_elem[] = "<ul><li><a href=\"%s/%s\"> %s</a></li></ul>\n";
+static char html_elem[] = "<ul><li><a href=\"%s%s%s\"> %s</a></li></ul>\n";
 
 static char html_foot[] = "</body></html>\n";
 
@@ -113,10 +113,18 @@ FRESULT fsDirContentHtml(DIR *dirObj, const char* dirpath, char* dataBuff)
 
    do
    {
+      char *separator = "\0";
       i = dirObj->index;
       fsres = f_readdir(dirObj, &inf);      
+      if (dirpath[strlen(dirpath)] != '/') //avoid double slash 
+         separator = "/";
+      if (!strcmp(dirpath,"/"))
+      {
+	 separator = "\0";
+         dirpath ="\0";
+      }
       if (i != dirObj->index) {
-         sprintf(dataBuff+strlen(dataBuff), html_elem, dirpath, inf.fname, inf.fname);
+         sprintf(dataBuff+strlen(dataBuff), html_elem, dirpath, separator, inf.fname, inf.fname);
       }
 
    } while (i != dirObj->index);
@@ -178,6 +186,7 @@ int offset, int bytesToRead)
 
       if (offset == 0)
       {      
+        memset(dir_list_buffer, 0, sizeof(dir_list_buffer));
       	fsres = f_opendir(&dir, fspath);
         pmesg(MSG_INFO, "serving directory %s\n", fspath);
 

@@ -1287,9 +1287,7 @@ FRESULT f_opendir (
   FRESULT res;
   FATFS *fs;
 
-printf("before auto_mount");
   res = auto_mount(&path, &fs, 0);
-  printf("after auto_mount");
   if (res != FR_OK) return res;
   dirobj->fs = fs;
 
