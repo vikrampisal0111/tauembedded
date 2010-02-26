@@ -1,0 +1,54 @@
+ 
+ Week 3 Report
+---------------
+
+* Eyal Widder, 064986375
+  eyalwidd
+  wieyal@gmail.com
+  052-8746925
+
+* Michael Gendelman, 3043302018
+  genedlma
+  genged@gmail.com
+  057-8162297, 054-8105885
+
+* Title of your project:
+  Network attached storage on SD (LPC2148)
+
+* Project description:
+  A device which will serve files located on an SD card attached to the LPC board through a web interface.
+  The file system on the SD card will be standard Fat so that the SD can be pulled from a PC or a Camera and put in the device.
+  The device will act as an independant server on the network getting a dynamic IP using a DHCP client (with an option to set a static IP).
+  If time allows a USB control interface will be developed to upload files to the SD card and to configure device parameters (web server, IP config etc.)
+
+     LPC2148
+     +------------------+
+     |   Web Server     |
+     |      -----       |
+     | FatFS  | uIP     |
+     |	    -----       |                     ----------
+     | SD Drv | Eth Drv |-----Ethernet--------| Router |
+
+     +------------------+                     ----------
+          |                                      |
+          |                          -----------------
+          -----------USB-------------| Host Computer |
+
+                                     -----------------
+
+* Currently we have:
+   1. A working SD driver with read/write capabilities.
+   2. A partial media storage device driver implementing the FatFS device driver interface.
+   3. FatFS porting verified to read/write files to the root of the file system.
+   4. A partial ethernet driver.
+   5. A uIP port for the LPC2148 on top of the eth driver (Not fully tested)
+   + A convenient makefile based build system for the project.
+
+* Hardware on loan:
+   1. LPC2148 + USB Cable
+   2. Ethernet extension
+
+* We think we would like to release the code as GPL.
+
+* Target date for project submission: 14.2.10
+

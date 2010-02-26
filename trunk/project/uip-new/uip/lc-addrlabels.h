@@ -1,5 +1,13 @@
+//
+//  $Id: lc-addrlabels.h 107 2008-10-10 19:54:55Z jcw $
+//  $Revision: 107 $
+//  $Author: jcw $
+//  $Date: 2008-10-10 15:54:55 -0400 (Fri, 10 Oct 2008) $
+//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/lc-addrlabels.h $
+//
+
 /*
- * Copyright (c) 2006, Swedish Institute of Computer Science.
+ * Copyright (c) 2004-2005, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +36,56 @@
  *
  * This file is part of the uIP TCP/IP stack
  *
- * $Id: uip-neighbor.h,v 1.2 2006/06/12 08:00:30 adam Exp $
+ * Author: Adam Dunkels <adam@sics.se>
+ *
+ * $Id: lc-addrlabels.h 107 2008-10-10 19:54:55Z jcw $
+ */
+
+/**
+ * \addtogroup lc
+ * @{
  */
 
 /**
  * \file
- *         Header file for database of link-local neighbors, used by
- *         IPv6 code and to be used by future ARP code.
+ * Implementation of local continuations based on the "Labels as
+ * values" feature of gcc
  * \author
- *         Adam Dunkels <adam@sics.se>
+ * Adam Dunkels <adam@sics.se>
+ *
+ * This implementation of local continuations is based on a special
+ * feature of the GCC C compiler called "labels as values". This
+ * feature allows assigning pointers with the address of the code
+ * corresponding to a particular C label.
+ *
+ * For more information, see the GCC documentation:
+ * http://gcc.gnu.org/onlinedocs/gcc/Labels-as-Values.html
+ *
+ * Thanks to dividuum for finding the nice local scope label
+ * implementation.
  */
 
-#ifndef __UIP_NEIGHBOR_H__
-#define __UIP_NEIGHBOR_H__
+#ifndef __LC_ADDRLABELS_H__
+#define __LC_ADDRLABELS_H__
 
-#include "uip.h"
+/** \hideinitializer */
+typedef void * lc_t;
 
-struct uip_neighbor_addr {
-#if UIP_NEIGHBOR_CONF_ADDRTYPE
-  UIP_NEIGHBOR_CONF_ADDRTYPE addr;
-#else
-  struct uip_eth_addr addr;
-#endif
-}__attribute__((packed));
+#define LC_INIT(s) s = NULL
 
-void uip_neighbor_init(void);
-void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr);
-void uip_neighbor_update(uip_ipaddr_t ipaddr);
-struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr);
-void uip_neighbor_periodic(void);
 
-#endif /* __UIP-NEIGHBOR_H__ */
+#define LC_RESUME(s)                            \
+  do {                                          \
+    if(s != NULL) {                             \
+      goto *s;                                  \
+    }                                           \
+  } while(0)
+
+#define LC_SET(s)                               \
+  do { ({ __label__ resume; resume: (s) = &&resume; }); }while(0)
+
+#define LC_END(s)
+
+#endif /* __LC_ADDRLABELS_H__ */
+
+/**  @} */

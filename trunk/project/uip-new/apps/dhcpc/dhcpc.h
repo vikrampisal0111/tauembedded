@@ -1,5 +1,13 @@
+//
+//  $Id: dhcpc.h 275 2008-11-02 18:23:49Z jcw $
+//  $Revision: 275 $
+//  $Author: jcw $
+//  $Date: 2008-11-02 13:23:49 -0500 (Sun, 02 Nov 2008) $
+//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/apps/dhcpc/dhcpc.h $
+//
+
 /*
- * Copyright (c) 2006, Swedish Institute of Computer Science.
+ * Copyright (c) 2005, Swedish Institute of Computer Science
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +36,56 @@
  *
  * This file is part of the uIP TCP/IP stack
  *
- * $Id: uip-neighbor.h,v 1.2 2006/06/12 08:00:30 adam Exp $
+ * @(#)$Id: dhcpc.h 275 2008-11-02 18:23:49Z jcw $
  */
+#ifndef __DHCPC_H__
+#define __DHCPC_H__
 
-/**
- * \file
- *         Header file for database of link-local neighbors, used by
- *         IPv6 code and to be used by future ARP code.
- * \author
- *         Adam Dunkels <adam@sics.se>
- */
+#include "../../uip/uip_timer.h"
+#include "../../uip/pt.h"
 
-#ifndef __UIP_NEIGHBOR_H__
-#define __UIP_NEIGHBOR_H__
+//
+//
+//
+#define DHCPC_SERVER_PORT  67
+#define DHCPC_CLIENT_PORT  68
 
-#include "uip.h"
+//
+//
+//
+typedef struct dhcpcState_s
+{
+  struct pt pt;
+  char state;
+  struct uip_udp_conn *conn;
+  struct timer timer;
+  u16_t ticks;
+  const void *mac_addr;
+  int mac_len;
+  
+  u8_t serverid [4];
+  u16_t lease_time [2];
+  u16_t ipaddr [2];
+  u16_t netmask [2];
+  u16_t dnsaddr [2];
+  u16_t default_router [2];
+  u16_t sntpaddr [2];
+  n32_t timeoffset;
+}
+dhcpcState_t;
 
-struct uip_neighbor_addr {
-#if UIP_NEIGHBOR_CONF_ADDRTYPE
-  UIP_NEIGHBOR_CONF_ADDRTYPE addr;
-#else
-  struct uip_eth_addr addr;
+typedef dhcpcState_t uip_udp_appstate_dhcpc;
+
+//
+//
+//
+void dhcpc_init (const void *mac_addr, int mac_len);
+void dhcpc_request (void);
+void dhcpc_appcall (void);
+void dhcpc_configured (const dhcpcState_t *s);
+
+#ifndef UIP_UDP_APPCALL
+#define UIP_UDP_APPCALL dhcpc_appcall
 #endif
-}__attribute__((packed));
 
-void uip_neighbor_init(void);
-void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr);
-void uip_neighbor_update(uip_ipaddr_t ipaddr);
-struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr);
-void uip_neighbor_periodic(void);
-
-#endif /* __UIP-NEIGHBOR_H__ */
+#endif /* __DHCPC_H__ */
