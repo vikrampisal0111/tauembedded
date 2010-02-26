@@ -158,7 +158,6 @@ int main(void)
 		should be sent out on the network, the global variable
 		uip_len is set to a value > 0. */
 	    if(uip_len > 0) {
-		printf("udp send\n");
                 uip_arp_out();
 		network_send(uip_buf, uip_len);
 	    }
