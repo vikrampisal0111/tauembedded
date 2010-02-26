@@ -14,6 +14,8 @@
 
 #include "dhcpc.h"
 
+#include "clock.h"
+
 // Applications
 //#include "hello-world.h"
 //#include "simple.h"
@@ -23,7 +25,9 @@
 #define MY_MAC_ADDR	{ 0x00, 0xf8, 0xc1, 0xd8, 0xc7, 0xa6} 
 #define MSG_UIP_LOG	MSG_INFO
 
-DEFINE_pmesg_level(MSG_INFO);
+extern u16_t uip_slen;
+
+DEFINE_pmesg_level(MSG_DEBUG);
 
 void uip_log(char *m)
 {
@@ -49,7 +53,7 @@ void pmesg_hex(int level, uint8_t *buf, unsigned int len)
 }
 
 void dhcpc_configured(const struct dhcpc_state *s) {
-    pmesg(MSG_INFO, " - dhcp configured\n");
+	uip_sethostaddr(s->ipaddr);
 }
 
 int main(void)
@@ -63,14 +67,16 @@ int main(void)
     uip_ipaddr_t ipaddr;
     struct timer periodic_timer, arp_timer;
 
-    timer_set(&periodic_timer, CLOCK_SECOND * 100);
-    timer_set(&arp_timer, CLOCK_SECOND * 1000);
+    timer_set(&periodic_timer, CLOCK_SECOND * 1);
+    timer_set(&arp_timer, CLOCK_SECOND * 1);
 
     VPBDIV = 0x02;
 
     fopen("uart0", "w");
 
     fsInit(); //init fileserver module.
+
+    clock_init();
 
     pmesg(MSG_INFO, "- Started Uart\n");
 
@@ -144,9 +150,23 @@ int main(void)
 	{
 	    //pmesg(MSG_DEBUG, "Timer expired: periodic timer (%d)\n", periodic_timer.start);
 	    timer_reset(&periodic_timer);
-	    for(i = 0; i < UIP_CONNS; i++) 
+	    
+
+   	    for(i = 0; i < UIP_UDP_CONNS; i++) {
+	    uip_udp_periodic(i);
+	    /*  If the above function invocation resulted in data that
+		should be sent out on the network, the global variable
+		uip_len is set to a value > 0. */
+	    if(uip_len > 0) {
+		printf("udp send\n");
+                uip_arp_out();
+		network_send(uip_buf, uip_len);
+	    }
+	}
+
+            for(i = 0; i < UIP_CONNS; i++) 
 	    {
-		uip_periodic(i);
+                uip_periodic(i);
 		/* If the above function invocation resulted in data that
 		   should be sent out on the network, the global variable
 		   uip_len is set to a value > 0. */
@@ -160,16 +180,7 @@ int main(void)
 
 
 #if UIP_UDP
-	for(i = 0; i < UIP_UDP_CONNS; i++) {
-	    uip_udp_periodic(i);
-	    /*  If the above function invocation resulted in data that
-		should be sent out on the network, the global variable
-		uip_len is set to a value > 0. */
-	    if(uip_len > 0) {
-		uip_arp_out();
-		network_send(uip_buf, uip_len);
-	    }
-	}
+
 #endif /*  UIP_UDP */
 
 
