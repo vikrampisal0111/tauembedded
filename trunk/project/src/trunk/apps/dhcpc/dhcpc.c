@@ -39,6 +39,8 @@
 #include "timer.h"
 #include "pt.h"
 
+#include "debug.h"
+
 #define STATE_INITIAL         0
 #define STATE_SENDING         1
 #define STATE_OFFER_RECEIVED  2
@@ -170,20 +172,20 @@ strcpy(m->sname, MYHOST);
     static void
 send_discover(void)
 {
-    printf("send_discover\n");
+    pmesg(MSG_DEBUG, "send_discover\n");
     u8_t *end;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
-    printf("a\n");
+    pmesg(MSG_DEBUG, "a\n");
     create_msg(m);
-    printf("b\n");
+    pmesg(MSG_DEBUG, "b\n");
     end = add_msg_type(&m->options[4], DHCPDISCOVER);
-    printf("c\n");
+    pmesg(MSG_DEBUG, "c\n");
     end = add_req_options(end);
-    printf("d\n");
+    pmesg(MSG_DEBUG, "d\n");
     end = add_end(end);
-    printf("send_discover: before uip_send\n");
+    pmesg(MSG_DEBUG, "send_discover: before uip_send\n");
     uip_send(uip_appdata, end - (u8_t *)uip_appdata);
-    printf("send_discover: after uip_send\n");
+    pmesg(MSG_DEBUG, "send_discover: after uip_send\n");
 }
 /*---------------------------------------------------------------------------*/
     static void
@@ -198,9 +200,9 @@ send_request(void)
     end = add_server_id(end);
     end = add_req_ipaddr(end);
     end = add_end(end);
-    printf("send_request: before uip_send\n"); 
+    pmesg(MSG_DEBUG, "send_request: before uip_send\n"); 
     uip_send(uip_appdata, end - (u8_t *)uip_appdata);
-    printf("send_request: after uip_send\n"); 
+    pmesg(MSG_DEBUG, "send_request: after uip_send\n"); 
 }
 /*---------------------------------------------------------------------------*/
     static u8_t
@@ -264,10 +266,10 @@ PT_THREAD(handle_dhcp(void))
     /* try_again:*/
     s.state = STATE_SENDING;
     s.ticks = CLOCK_SECOND;
-    printf("in handle_dhcp\n");
+    pmesg(MSG_DEBUG, "in handle_dhcp\n");
     do {
         send_discover();
-        printf("after send_discover\n");
+        pmesg(MSG_DEBUG, "after send_discover\n");
         timer_set(&s.timer, s.ticks);
         PT_YIELD_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
 
@@ -285,7 +287,7 @@ PT_THREAD(handle_dhcp(void))
 
     do {
         send_request();
-        printf("after send_request\n");
+        pmesg(MSG_DEBUG, "after send_request\n");
         timer_set(&s.timer, s.ticks);
         PT_YIELD_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
 
@@ -302,19 +304,19 @@ PT_THREAD(handle_dhcp(void))
     } while(s.state != STATE_CONFIG_RECEIVED);
 
 #if 1
-    printf("Got IP address %d.%d.%d.%d\n",
+    pmesg(MSG_DEBUG, "Got IP address %d.%d.%d.%d\n",
             uip_ipaddr1(s.ipaddr), uip_ipaddr2(s.ipaddr),
             uip_ipaddr3(s.ipaddr), uip_ipaddr4(s.ipaddr));
-    printf("Got netmask %d.%d.%d.%d\n",
+    pmesg(MSG_DEBUG, "Got netmask %d.%d.%d.%d\n",
             uip_ipaddr1(s.netmask), uip_ipaddr2(s.netmask),
             uip_ipaddr3(s.netmask), uip_ipaddr4(s.netmask));
-    printf("Got DNS server %d.%d.%d.%d\n",
+    pmesg(MSG_DEBUG, "Got DNS server %d.%d.%d.%d\n",
             uip_ipaddr1(s.dnsaddr), uip_ipaddr2(s.dnsaddr),
             uip_ipaddr3(s.dnsaddr), uip_ipaddr4(s.dnsaddr));
-    printf("Got default router %d.%d.%d.%d\n",
+    pmesg(MSG_DEBUG, "Got default router %d.%d.%d.%d\n",
             uip_ipaddr1(s.default_router), uip_ipaddr2(s.default_router),
             uip_ipaddr3(s.default_router), uip_ipaddr4(s.default_router));
-    printf("Lease expires in %ld seconds\n",
+    pmesg(MSG_DEBUG, "Lease expires in %ld seconds\n",
             ntohs(s.lease_time[0])*65536ul + ntohs(s.lease_time[1]));
 #endif
 
