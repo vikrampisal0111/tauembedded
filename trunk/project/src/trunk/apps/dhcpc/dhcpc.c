@@ -44,6 +44,8 @@
 #define STATE_OFFER_RECEIVED  2
 #define STATE_CONFIG_RECEIVED 3
 
+#define MYHOST "SDSERV"
+
 static struct dhcpc_state s;
 
 struct dhcp_msg {
@@ -158,6 +160,7 @@ create_msg(register struct dhcp_msg *m)
     memset(&m->chaddr[s.mac_len], 0, sizeof(m->chaddr) - s.mac_len);
 #ifndef UIP_CONF_DHCP_LIGHT
     memset(m->sname, 0, sizeof(m->sname));
+strcpy(m->sname, MYHOST);
     memset(m->file, 0, sizeof(m->file));
 #endif
 
@@ -243,7 +246,11 @@ parse_msg(void)
     if(m->op == DHCP_REPLY &&
             memcmp(m->xid, xid, sizeof(xid)) == 0 &&
             memcmp(m->chaddr, s.mac_addr, s.mac_len) == 0) {
-        memcpy(s.ipaddr, m->yiaddr, 4);
+
+// bugfix: copy ipaddr to state.
+	for (int j=0; j<4; j++)
+	        ((u8_t*)s.ipaddr)[j] = m->yiaddr[j];
+
         return parse_options(&m->options[4], uip_datalen());
     }
     return 0;
@@ -262,7 +269,7 @@ PT_THREAD(handle_dhcp(void))
         send_discover();
         printf("after send_discover\n");
         timer_set(&s.timer, s.ticks);
-        PT_WAIT_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
+        PT_YIELD_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
 
         if(uip_newdata() && parse_msg() == DHCPOFFER) {
             s.state = STATE_OFFER_RECEIVED;
@@ -280,7 +287,7 @@ PT_THREAD(handle_dhcp(void))
         send_request();
         printf("after send_request\n");
         timer_set(&s.timer, s.ticks);
-        PT_WAIT_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
+        PT_YIELD_UNTIL(&s.pt, uip_newdata() || timer_expired(&s.timer));
 
         if(uip_newdata() && parse_msg() == DHCPACK) {
             s.state = STATE_CONFIG_RECEIVED;
@@ -343,10 +350,17 @@ dhcpc_init(const void *mac_addr, int mac_len)
     PT_INIT(&s.pt);
 }
 /*---------------------------------------------------------------------------*/
+int state = 20;
+
     void
 dhcpc_appcall(void)
 {
+if (state)
+{
     handle_dhcp();
+    state--;
+}
+
 }
 /*---------------------------------------------------------------------------*/
     void
