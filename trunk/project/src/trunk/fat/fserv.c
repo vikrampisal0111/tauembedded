@@ -75,6 +75,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize
          return fsres;
       }
       type = FSERV_NONEXSIT;
+      return FR_OK;
    }
 
    // Otherwise, this means object exist and we can query the attrib info.
