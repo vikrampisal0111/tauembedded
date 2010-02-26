@@ -27,7 +27,7 @@
 
 extern u16_t uip_slen;
 
-DEFINE_pmesg_level(MSG_DEBUG);
+DEFINE_pmesg_level(MSG_INFO);
 
 void uip_log(char *m)
 {
