@@ -350,18 +350,13 @@ dhcpc_init(const void *mac_addr, int mac_len)
     PT_INIT(&s.pt);
 }
 /*---------------------------------------------------------------------------*/
-int state = 20;
 
-    void
+void
 dhcpc_appcall(void)
 {
-if (state)
-{
     handle_dhcp();
-    state--;
 }
 
-}
 /*---------------------------------------------------------------------------*/
     void
 dhcpc_request(void)
