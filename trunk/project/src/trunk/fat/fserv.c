@@ -49,7 +49,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize
    // Check if root dir.   
    if (!strcmp(path, "/")) {
       constructFsPath("/");
-      pmesg(MSG_INFO, "fserv: root directory info queried\n");
+      pmesg(MSG_DEBUG, "fserv: root directory info queried\n");
       if (elemType != NULL)
          *elemType = FSERV_DIR;
       if (byteSize != NULL)
@@ -59,7 +59,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize
 
    constructFsPath(path);
 
-   pmesg(MSG_INFO, "fserv: Full path = %s\n", fspath);
+   pmesg(MSG_DEBUG, "fserv: Full path = %s\n", fspath);
 
    // Get element type.
    fsres = f_stat(fspath, &inf);
@@ -166,7 +166,7 @@ int offset, int bytesToRead)
    {
    case FSERV_FILE:      
       fsres = f_open(&file, fspath, FA_READ);
-      pmesg(MSG_INFO, "serving file\n");
+      pmesg(MSG_DEBUG, "serving file\n");
       if (fsres != FR_OK) 
       {
          return fsres;
@@ -195,17 +195,17 @@ int offset, int bytesToRead)
       {      
         memset(dir_list_buffer, 0, sizeof(dir_list_buffer));
       	fsres = f_opendir(&dir, fspath);
-        pmesg(MSG_INFO, "serving directory %s\n", fspath);
+        pmesg(MSG_DEBUG, "serving directory %s\n", fspath);
 
       	if (fsres) return fsres;
       
-        printf("start build html\n");
+        pmesg(MSG_DEBUG, "start build html\n");
       	fsres = fsDirContentHtml(&dir, path, dir_list_buffer);
         
       	if (fsres) return fsres;
-        printf("build html: *** \n\n %s ***\n\n", dir_list_buffer);
+        pmesg(MSG_DEBUG, "build html: *** \n\n %s ***\n\n", dir_list_buffer);
       }
-      printf("\nlist offset = %d, bytes to read = %d\n", offset, bytesToRead);
+      pmesg(MSG_DEBUG, "\nlist offset = %d, bytes to read = %d\n", offset, bytesToRead);
 //finally copy partial list info into buffer.
       memcpy(dataBuff, dir_list_buffer + offset, bytesToRead);
 
