@@ -64,6 +64,8 @@
 
 #include <string.h>
 
+#include "debug.h"
+
 #define STATE_WAITING 0
 #define STATE_OUTPUT  1
 
@@ -88,9 +90,7 @@ static unsigned short generate_part_of_file(void *state)
 	s->len = s->file.len;
     }
 
-//    memcpy(uip_appdata, s->file.data, s->len);
-        
-printf("\ncall GetElementData with fname=%s, offset=%d, len=%d\n",s->filename,s->file.offset,s->len);
+pmesg(MSG_DEBUG, "\ncall GetElementData with fname=%s, offset=%d, len=%d\n",s->filename,s->file.offset,s->len);
     fsGetElementData(s->filename, uip_appdata, s->file.offset, s->len);
     s->file.offset += s->len;
     
@@ -225,39 +225,46 @@ static PT_THREAD(send_headers(struct httpd_state *s, const char *statushdr))
 /*---------------------------------------------------------------------------*/
 static PT_THREAD(handle_output(struct httpd_state *s))
 {
+    char isIndex = 0;
     char *ptr;
     FRESULT fres;
     char *fname = s->filename;
     PT_BEGIN(&s->outputpt);
-printf("\nhandle_output state filename = %s\n", fname);
-      
-       fres = fsGetElementInfo(fname, &s->file.type, &s->file.len);
+    
+    if (!strcmp(s->filename, "/index.html"))
+    {
+	isIndex = 1;
+	fname = "/index.htm"; // FS does not support long filenames.
+    }
 
-      // TODO: create and communicate error log in case fres != FR_OK. 
+       fres = fsGetElementInfo(fname, &s->file.type, &s->file.len);
         
-       /* Checks if index document is requested and availalbe.
+       /* Checks if index document is requested and availalbe.:
           In case it is not available return the root listing. */
-        if (!strcmp("/index.html",fname))
-        {
-		if (s->file.type == FSERV_NONEXSIT)
-                { printf("info: recognized root dir trying to change\n");
+        if (isIndex)
+        {		
+                if (s->file.type == FSERV_NONEXSIT)
+                { 
+                    pmesg(MSG_DEBUG,"info: recognized as root dir listing\n");
 		    strcpy(s->filename,"/");
 		    fname = "/"; //root dir listing.
        		    fres = fsGetElementInfo(fname, &s->file.type, &s->file.len);
                 }
+		strcpy(s->filename,"/index.htm");
         }
 
-printf("fsres = %d\n", fres);
 	if (FSERV_NONEXSIT == s->file.type)
         {
-printf("file not found\n");	 
-		httpd_fs_open(http_404_html, &s->file);
-		strcpy(s->filename, http_404_html);
-		PT_WAIT_THREAD(&s->outputpt, send_headers(s, http_header_404));
-		PT_WAIT_THREAD(&s->outputpt, send_file(s));
+		pmesg(MSG_DEBUG, "file not found\n");	 
+		
+                if (fres == FR_OK)
+		{
+			pmesg(MSG_DEBUG, "issue 404\n");
+			PT_WAIT_THREAD(&s->outputpt, send_headers(s, http_header_404));
+		}
         }
 	else { // File/Directory exists.
-printf("\nfile is found\n");
+		pmesg(MSG_DEBUG, "\nfile is found\n");
                 s->file.offset = 0;
 	        PT_WAIT_THREAD(&s->outputpt, send_file(s));	
 	}
