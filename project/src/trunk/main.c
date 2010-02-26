@@ -65,7 +65,7 @@ int main(void)
 
     fopen("uart0", "w");
 
-	fsInit(); //init fileserver module.
+    fsInit(); //init fileserver module.
 
     //Regular open does not work...
     //open("uart0", O_WRONLY, 0777);

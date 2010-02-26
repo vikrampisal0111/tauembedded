@@ -1,3 +1,11 @@
+//
+//  $Id: uip-neighbor.h 107 2008-10-10 19:54:55Z jcw $
+//  $Revision: 107 $
+//  $Author: jcw $
+//  $Date: 2008-10-10 15:54:55 -0400 (Fri, 10 Oct 2008) $
+//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/uip-neighbor.h $
+//
+
 /*
  * Copyright (c) 2006, Swedish Institute of Computer Science.
  * All rights reserved.
@@ -28,7 +36,7 @@
  *
  * This file is part of the uIP TCP/IP stack
  *
- * $Id: uip-neighbor.h,v 1.2 2006/06/12 08:00:30 adam Exp $
+ * $Id: uip-neighbor.h 107 2008-10-10 19:54:55Z jcw $
  */
 
 /**
@@ -50,7 +58,7 @@ struct uip_neighbor_addr {
 #else
   struct uip_eth_addr addr;
 #endif
-}__attribute__((packed));
+};
 
 void uip_neighbor_init(void);
 void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr);

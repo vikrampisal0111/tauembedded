@@ -1,5 +1,13 @@
+//
+//  $Id: lc-switch.h 107 2008-10-10 19:54:55Z jcw $
+//  $Revision: 107 $
+//  $Author: jcw $
+//  $Date: 2008-10-10 15:54:55 -0400 (Fri, 10 Oct 2008) $
+//  $HeadURL: http://tinymicros.com/svn_public/arm/lpc2148_demo/trunk/uip/uip/lc-switch.h $
+//
+
 /*
- * Copyright (c) 2006, Swedish Institute of Computer Science.
+ * Copyright (c) 2004-2005, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,34 +36,49 @@
  *
  * This file is part of the uIP TCP/IP stack
  *
- * $Id: uip-neighbor.h,v 1.2 2006/06/12 08:00:30 adam Exp $
+ * Author: Adam Dunkels <adam@sics.se>
+ *
+ * $Id: lc-switch.h 107 2008-10-10 19:54:55Z jcw $
+ */
+
+/**
+ * \addtogroup lc
+ * @{
  */
 
 /**
  * \file
- *         Header file for database of link-local neighbors, used by
- *         IPv6 code and to be used by future ARP code.
- * \author
- *         Adam Dunkels <adam@sics.se>
+ * Implementation of local continuations based on switch() statment
+ * \author Adam Dunkels <adam@sics.se>
+ *
+ * This implementation of local continuations uses the C switch()
+ * statement to resume execution of a function somewhere inside the
+ * function's body. The implementation is based on the fact that
+ * switch() statements are able to jump directly into the bodies of
+ * control structures such as if() or while() statmenets.
+ *
+ * This implementation borrows heavily from Simon Tatham's coroutines
+ * implementation in C:
+ * http://www.chiark.greenend.org.uk/~sgtatham/coroutines.html
  */
 
-#ifndef __UIP_NEIGHBOR_H__
-#define __UIP_NEIGHBOR_H__
+#ifndef __LC_SWITCH_H__
+#define __LC_SWTICH_H__
 
-#include "uip.h"
+/* WARNING! lc implementation using switch() does not work if an
+   LC_SET() is done within another switch() statement! */
 
-struct uip_neighbor_addr {
-#if UIP_NEIGHBOR_CONF_ADDRTYPE
-  UIP_NEIGHBOR_CONF_ADDRTYPE addr;
-#else
-  struct uip_eth_addr addr;
-#endif
-}__attribute__((packed));
+/** \hideinitializer */
+typedef unsigned short lc_t;
 
-void uip_neighbor_init(void);
-void uip_neighbor_add(uip_ipaddr_t ipaddr, struct uip_neighbor_addr *addr);
-void uip_neighbor_update(uip_ipaddr_t ipaddr);
-struct uip_neighbor_addr *uip_neighbor_lookup(uip_ipaddr_t ipaddr);
-void uip_neighbor_periodic(void);
+#define LC_INIT(s) s = 0;
 
-#endif /* __UIP-NEIGHBOR_H__ */
+#define LC_RESUME(s) switch(s) { case 0:
+
+#define LC_SET(s) s = __LINE__; case __LINE__:
+
+#define LC_END(s) }
+
+#endif /* __LC_SWITCH_H__ */
+
+/** @} */

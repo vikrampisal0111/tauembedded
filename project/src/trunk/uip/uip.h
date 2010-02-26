@@ -1179,7 +1179,7 @@ struct uip_conn {
 
   /** The application state. */
   uip_tcp_appstate_t appstate;
-};
+} __attribute__((packed));
 
 
 /**
@@ -1216,7 +1216,7 @@ struct uip_udp_conn {
 
   /** The application state. */
   uip_udp_appstate_t appstate;
-};
+}__attribute__((packed));
 
 /**
  * The current UDP connection.
@@ -1250,14 +1250,14 @@ struct uip_stats {
 			     checksum errors. */
     uip_stats_t protoerr; /**< Number of packets dropped since they
 			     were neither ICMP, UDP nor TCP. */
-  } ip;                   /**< IP statistics. */
+  }__attribute__((packed)) ip;                   /**< IP statistics. */
   struct {
     uip_stats_t drop;     /**< Number of dropped ICMP packets. */
     uip_stats_t recv;     /**< Number of received ICMP packets. */
     uip_stats_t sent;     /**< Number of sent ICMP packets. */
     uip_stats_t typeerr;  /**< Number of ICMP packets with a wrong
 			     type. */
-  } icmp;                 /**< ICMP statistics. */
+  }__attribute__((packed)) icmp;                 /**< ICMP statistics. */
   struct {
     uip_stats_t drop;     /**< Number of dropped TCP segments. */
     uip_stats_t recv;     /**< Number of recived TCP segments. */
@@ -1272,7 +1272,7 @@ struct uip_stats {
 			     connections was avaliable. */
     uip_stats_t synrst;   /**< Number of SYNs for closed ports,
 			     triggering a RST. */
-  } tcp;                  /**< TCP statistics. */
+  }__attribute__((packed)) tcp;                  /**< TCP statistics. */
 #if UIP_UDP
   struct {
     uip_stats_t drop;     /**< Number of dropped UDP segments. */
@@ -1280,9 +1280,9 @@ struct uip_stats {
     uip_stats_t sent;     /**< Number of sent UDP segments. */
     uip_stats_t chkerr;   /**< Number of UDP segments with a bad
 			     checksum. */
-  } udp;                  /**< UDP statistics. */
+  }__attribute__((packed)) udp;                  /**< UDP statistics. */
 #endif /* UIP_UDP */
-};
+}__attribute__((packed));
 
 /**
  * The uIP TCP/IP statistics.

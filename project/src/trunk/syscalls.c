@@ -18,9 +18,9 @@ static devop_tab_t *devop_tab_list[] = {
     &devop_tab_uart0,  /* standard output */
     &devop_tab_uart0,  /* standard error */
     &devop_tab_fatfs,  /* another device */
-    0 // End on list
+    0 // End of list
 };
-#include "uart0.h"
+
 int _open_r(struct _reent *preent, const char *file, int flags, int mode)
 {
     UNUSED_PARAM(flags);
@@ -28,9 +28,6 @@ int _open_r(struct _reent *preent, const char *file, int flags, int mode)
 
     int which_devoptab = 0;
     int fd = -1;
-    //uart0SendByte('a');
-    //uart0SendByte('\n');
-    //return 0;
 
     /* search for "file" in devop_tab_list[].name */
     do {
@@ -81,10 +78,10 @@ int _fstat_r(struct _reent *preent, int fd, struct stat *stat_buf)
 }
 
 // Avoid warning
-//int isatty(int fd); 
-//int isatty(int fd) {
-//    return 1;
-//}
+int isatty(int fd); 
+int isatty(int fd) {
+    return 1;
+}
 
 
 // end is set in the linker command file and 
@@ -99,6 +96,9 @@ extern char end[HEAP_SIZE];
 #else
 extern char end[];
 #endif
+
+// Points to current end of the heap
+static char *pheap_end;	
 
 //
 // Adjusts end of heap to provide more memory to memory allocator. 
@@ -115,11 +115,8 @@ extern char end[];
 void * _sbrk_r(struct _reent *preent, ptrdiff_t nbytes) {
     UNUSED_PARAM(preent);
 
-    // Points to current end of the heap
-    static char *pheap_end;	
-
     // errno should be set to  ENOMEM on error
-    char *base = NULL;		
+    char *base;		
 
     // First time init
     if (!pheap_end) {	
