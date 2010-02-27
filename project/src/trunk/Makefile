@@ -4,7 +4,7 @@
 # Prove we started from main Makefile
 export STARTEDATTOP=true
 
-LPC2148_OPTS=-DUART0_DEBUG -DCLOCK_CONF_SECOND=1000 -DTRACE
+LPC2148_OPTS=-DUART0_DEBUG -DCLOCK_CONF_SECOND=10 -DTRACE
 
 SUBDIRS =
 # arch
@@ -22,6 +22,7 @@ SUBDIRS += uip
 SUBDIRS += fat
 
 SUBDIRS += apps/sdserver
+SUBDIRS += apps/dhcpc
 #SUBDIRS += apps/webserver
 #SUBDIRS += apps/hello-world
 #SUBDIRS += apps/simple
@@ -65,6 +66,7 @@ INCLUDES += -I$(ROOT)/arch/lpc21xx/clock
 INCLUDES += -I$(ROOT)/arch/lpc21xx/timer
 
 # apps
+INCLUDES += -I$(ROOT)/apps/dhcpc
 INCLUDES += -I$(ROOT)/apps/sdserver
 #INCLUDES += -I$(ROOT)/apps/webserver
 #INCLUDES += -I$(ROOT)/apps/hello-world 

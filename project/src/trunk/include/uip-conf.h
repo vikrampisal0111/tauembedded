@@ -141,7 +141,7 @@ typedef unsigned short uip_stats_t;
  */
 #define UIP_CONF_STATISTICS      1
 
-#define UIP_BROADCAST           1
+#define UIP_CONF_BROADCAST           1
 
 /* Here we include the header file for the application(s) we use in
    our project. */

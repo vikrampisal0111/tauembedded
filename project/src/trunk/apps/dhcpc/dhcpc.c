@@ -34,6 +34,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "debug.h"
+
 #include "uip.h"
 #include "dhcpc.h"
 #include "timer.h"
@@ -175,7 +177,9 @@ send_discover(void)
     pmesg(MSG_DEBUG, "send_discover\n");
     u8_t *end;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
+
     create_msg(m);
+
     end = add_msg_type(&m->options[4], DHCPDISCOVER);
     end = add_req_options(end);
     end = add_end(end);
@@ -196,6 +200,7 @@ send_request(void)
     end = add_server_id(end);
     end = add_req_ipaddr(end);
     end = add_end(end);
+
     pmesg(MSG_DEBUG, "send_request: before uip_send\n"); 
     uip_send(uip_appdata, end - (u8_t *)uip_appdata);
     pmesg(MSG_DEBUG, "send_request: after uip_send\n"); 
@@ -236,11 +241,21 @@ parse_options(u8_t *optptr, int len)
     return type;
 }
 /*---------------------------------------------------------------------------*/
+
+void print_dhcp_msg(struct dhcp_msg *msg) {
+    printf("op %d\n", msg->op);
+    printf("xid %x %x %x %x\n", msg->xid[0], msg->xid[1], msg->xid[2], msg->xid[3]);
+    printf("chaddr %x\n", msg->chaddr);
+    printf("yiaddr %d %d %d %d\n", msg->yiaddr[0], msg->yiaddr[1], msg->yiaddr[2], msg->yiaddr[3]);
+
+}
+
     static u8_t
 parse_msg(void)
 {
+    u8_t res;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
-
+    //print_dhcp_msg(m);
     if(m->op == DHCP_REPLY &&
             memcmp(m->xid, xid, sizeof(xid)) == 0 &&
             memcmp(m->chaddr, s.mac_addr, s.mac_len) == 0) {
@@ -249,7 +264,9 @@ parse_msg(void)
 	for (int j=0; j<4; j++)
 	        ((u8_t*)s.ipaddr)[j] = m->yiaddr[j];
 
-        return parse_options(&m->options[4], uip_datalen());
+        res = parse_options(&m->options[4], uip_datalen());
+        //printf("parse_options == %d\n", res);
+        return res;
     }
     return 0;
 }
@@ -299,7 +316,6 @@ PT_THREAD(handle_dhcp(void))
         }
     } while(s.state != STATE_CONFIG_RECEIVED);
 
-#if 1
     pmesg(MSG_INFO, "Got IP address %d.%d.%d.%d\n",
             uip_ipaddr1(s.ipaddr), uip_ipaddr2(s.ipaddr),
             uip_ipaddr3(s.ipaddr), uip_ipaddr4(s.ipaddr));
@@ -314,11 +330,10 @@ PT_THREAD(handle_dhcp(void))
             uip_ipaddr3(s.default_router), uip_ipaddr4(s.default_router));
     pmesg(MSG_INFO, "Lease expires in %ld seconds\n",
             ntohs(s.lease_time[0])*65536ul + ntohs(s.lease_time[1]));
-#endif
 
     dhcpc_configured(&s);
 
-    /*  timer_stop(&s.timer);*/
+    /* timer_stop(&s.timer);*/
 
     /*
      * PT_END restarts the thread so we do this instead. Eventually we
