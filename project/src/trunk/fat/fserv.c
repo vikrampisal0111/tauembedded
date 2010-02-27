@@ -48,9 +48,10 @@ FATFS fsdat; // Global file system container.
 
 FRESULT fsInit()
 {
-    SPI_Init();
-    //lcdInit(); // init lcd display.
-    return f_mount(0, &fsdat);
+   int r = SPI_Init();
+
+   if (r) return FR_NOT_READY;
+   return f_mount(0, &fsdat);
 }
 
 char fspath[MAX_PATH_LEN];
@@ -279,7 +280,7 @@ void fsSetIp(const unsigned char* pIp)
 
 
 
-   fsres = f_open(&file, IP_COOKIE, FA_CREATE_NEW | FA_CREATE_ALWAYS | FA_WRITE);
+   fsres = f_open(&file, IP_COOKIE, FA_CREATE_ALWAYS | FA_WRITE);
    pmesg(MSG_INFO, "open ip cookie : ___ ");
    if (fsres != FR_OK) return;
 
