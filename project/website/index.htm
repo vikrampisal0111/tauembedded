@@ -32,7 +32,8 @@
 			    <li><a href="#screenshots">Screenshots</a></li>
 			    <li><a href="#faq">FAQ</a></li>
 			    <li><a href="#future_work">Future Work</a></li>
-			    <li><a href="#about">About+Contact</a></li>
+			    <li><a href="#test_perf">Testing & Performace</a></li>
+			    <li><a href="#about">About & Contact</a></li>
 			</ul>
 		    </div>
 		    <p>&nbsp;</p>
@@ -62,7 +63,7 @@
 					    The file system is abstracted by the FServ component.</li>
 					    <li><b>DHCPC : </b>porting of the dhcpc application example from uIP. 
 					    This module has one time role during system boot to acquire an IP address for the server.</li>
-					    <li><b>Uip : </b>Porting of uIP 1.0 TCP/IP stack. Written by Adam Dunkels.</li>
+					    <li><b>uIP : </b>Porting of uIP 1.0 TCP/IP stack. Written by Adam Dunkels.</li>
 					    <li><b>Ethernet Driver : </b>Porting of a standard enc28j60 MicroChip ethernet controller with SPI interface.</li>
 					    <li><b>FServ : </b>Simplified file system interface and uniform access to directory list and file elements.
 					    This layer works on top of the FatFS file system module and is also responsible for html document generation in case of
@@ -80,7 +81,56 @@
 			    <!-- text -->
 			    <h1 id="how_works">How It Works</h1> 
 			    <div class="text_index">
-				    How It Works section
+				<h2>Initialization</h2>
+				When the board starts it initializes all components in the following order:<br />
+				It starts uart first so it will be possible to see debug messages and then the lcd to print the IP to the LCD. 
+				<code>
+				    fopen("uart0", "w"); <br />
+				    lcdInit();
+				</code>
+				It then initializes the clock:
+				<code>
+				clock_init();
+				</code>
+				The clock is used by uIP in order to set timers in the TCP/IP implemetation and also in the main loop for the 'periodic' and 'arp' timers.<br />
+				Next we initialize the the filesystem module:
+				<code>
+				fsInit();
+				</code>
+				This is really a lazy data structure initialization because the SD card init (mmc_init()) and fs mount (auto_mount()) happen automatically when a file is accessed using the fs API (f_open, f_stat etc.)<br />
+				Next, the network is initialized.
+				<code>
+				network_init();
+				</code>	
+				This code initializes the ethernet enc28j60 extension.
+				We then initialize uip, set the mac address to a static address we chose randomly. Finally, we start the HTTP server and the DHCP client.
+				<code>
+					uip_init();<br />
+					...<br />
+					uip_setethaddr(macaddr); <br />
+					...<br />
+					network_set_mac((uint8_t *)&(macaddr.addr));<br />
+					...<br />
+					httpd_init();<br />
+					...<br />
+					dhcpc_init(macaddr.addr, sizeof(macaddr.addr));<br />
+				</code>
+				<h2>Getting an IP</h2>
+				...
+				<h2>Serving requests</h2>
+				The HTTP implementation supports only HTTP GET. 
+				When the server receives a GET request it parses it 
+				and builds a path for the FServ module.
+				The FServ module check whether the given path is a directory or 
+				a file. If it is a directory it builds a directory listing 
+				and returns it to the caller. Otherwise, 
+				the file is read and returned to the caller.
+				Both dir listings and file data are sent in chunks 
+				according to the uip_mss. FServ uses the FatFS driver in order 
+				to get filesystem data. FatFS uses the underlaying SD driver to
+				perform raw data reads from the SD card.
+
+
 			    </div>
 			    <!-- text -->
 			    <h1 id="download">Download</h1>
@@ -110,24 +160,39 @@
 				    <p class="ans">You can look at our <a href="http://code.google.com/p/tauembedded/issues/list">GoogleCode issue list</a>
 				    <br/>
 				    We will also appreciate it if you tell us about bugs or problems you find in our code.
-				    <p class="question">How does the pins on the board need to be set in order to make your code work ?</p>
+				    <p class="question">How do the jumpers on board need to be set for your code to work ?</p>
 				    <p class="ans">You should set ethernet to work with spi0 and sd to work with spi1. <br />
 				    On the Ethernet extension: SO,SI and SCK pins should be set to SPI0 as drawn on the board itself <br />
 				    On LPC2148 you should set the SD card to work with SPI1. <br />
 				    The following images describe the correct jumper setting: <br />
 				    For LPC2148 (v2):<br />
-				    <img src="img/HW_jumpers.jpg" alt="LPC2148 jumper settings"/>
+				    <img src="img/hwjum.jpg" alt="LPC2148 jumper settings"/>
 				    <br /><br />
 				    For the ethernet extension: <br />
-				    <img src="img/eth_jumpers.gif" alt="Ethernet extension jumper settings"/>
+				    <img src="img/ethjum.gif" alt="Ethernet extension jumper settings"/>
 				    </p>
 			    </div> 
 			    <!-- text -->
 			    <h1 id="future_work">Future Work</h1>
 			    <div class="text_index">
-				Future Work section
-			    </div> 
+				<ul>
+					<li>One important feature that this projects lacks is the ability to upload files to the board. This can be achieved by implementing an ftp server on the board or by extending the http server implemntation in order to support HTTP PUT or HTTP POST which gives the abillity to upload files.</li>
+				</ul>
 
+			    </div> 
+			    <h1 id="test_perf">Testing & Performance</h1>
+			    <div class="text_index">
+				The code was tested on both v2 and v3 of the Embedded Artists 
+				LPC2148 Education Board with its extensions. <br />
+				SD cards of two sizes were used: 1GB and 32MB. 
+				Both of which presented similar performance. <br />
+				Most tests were performed when the board was connected 
+				to a switch which was connected to a router and to other PCs.
+				<br />
+				No real performance, stress testing & benchmarking was done, 
+				however the maximum speed we achieved using our setup 
+				was 5KB/s download.<br />
+			    </div>
 			    <!-- text -->
 			    <h1 id="about">About & Contact</h1> 
 			    <div class="text_index">

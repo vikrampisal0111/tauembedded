@@ -215,9 +215,28 @@ h1 {
 	padding-top: 5px;
 	padding-left: 10px;
 	padding-bottom: 5px;
-	font-size: 1.8em;
+	font-size: 24px;
 	font-weight: normal;
 	background: #ff8a00;
 	color: #fff;
+}
+
+h2 {
+	margin: 0px 0px 0px 0px;
+	padding-top: 5px;
+	padding-left: 0px;
+	padding-bottom: 5px;
+	font-size: 18px;
+	color: #000;
+	font-weight: bold;
+}
+
+code, pre {
+    display: block;
+    background-color: #FCF6E8;
+    padding: 5px 5px 5px 5px;
+    margin: 3px 3px 3px 3px;
+    border: 1px solid #dad4c8;
+    font-size: 13px;
 }
 
