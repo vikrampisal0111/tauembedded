@@ -25,9 +25,13 @@
 		<div id="left">
 		    <div id="menu">
 			<ul>
+			    <li><a href="#intro">Introduction</a></li>
+			    <li><a href="#sw_highlevel_design">SW High Level Design</a></li>
+			    <li><a href="#how_works">How It Works</a></li>
 			    <li><a href="#download">Download</a></li>
 			    <li><a href="#screenshots">Screenshots</a></li>
 			    <li><a href="#faq">FAQ</a></li>
+			    <li><a href="#future_work">Future Work</a></li>
 			    <li><a href="#about">About+Contact</a></li>
 			</ul>
 		    </div>
@@ -38,129 +42,110 @@
 		    <p><br />
 		    &nbsp;
 		    </p>
-		</div> <!-- left -->
-		<div id="right">
+	    </div> <!-- left -->
+	    <div id="right">
 		    <div id="content">
-			<!-- text -->
-			<div class="head_img">
-			    <a name="sw_high"></a>
-			    <img src="img/swh.gif" alt="SW high-level design" width="481" height="44"/> 
-			</div>
-			<div class="text_index">
-			    This section describes high level details of the software organization. <br>
-				The whole mechanism is built out of several components (software modules) designed to perform a designated role. <br>
-				Not all of these modules were written by us, most are porting of open source code. <br>
-				<h3>Components:</h3>
-				<ul>
-				<li><b>SD Server : </b>based on the httpd web server application example from uIP.
-				This module is responsible for HTTP serving of files over TCP/IP. <br>
-				The file system is abstracted by the FServ component.</li>
-				<li><b>DHCPC : </b>porting of the dhcpc application example from uIP. 
-				This module has one time role during system boot to acquire an IP address for the server.</li>
-				<li><b>Uip : </b>Porting of uIP 1.0 TCP/IP stack. Written by Adam Dunkels.</li>
-				<li><b>Ethernet Driver : </b>Porting of a standard enc28j60 MicroChip ethernet controller with SPI interface.</li>
-				<li><b>FServ : </b>Simplified file system interface and uniform access to directory list and file elements.
-				This layer works on top of the FatFS file system module and is also responsible for html document generation in case of
-				directory browsing.
-				<li><b>FatFS : </b>Porting of FatFS embedded file system module. Written by ChaN.</li>
-				<li><b>I/O Device Driver : </b>Simple FatFS interface device driver for accessing the SD cards.</li>
-				<li><b>SD/MMC Driver : </b>Partial implementation of the SD/MMC protocol. Porting of an example for implementation from NXP.</li>
-				<li><b>SPI {0,1} : </b> Both Ethernet and SD/MMC use SPI as a bus. 
-				Separated as two distinct drivers to exploit the two SPI bus controllers available on board.</li>
-				</ul>
-				
-				The project as a mechanism can be depicted by the following diagram:
-				<img src="img/swhigh.jpg"/>										
-				
-			</div> 
-			<!-- text -->
-			<div class="text_index">
-				In this project we set out to create a simple network attached storage device using a LPC2148 Board and an SD Card.
-				The general architecture looks like this:
-				<pre class="code">
-     LPC2148+Eth Extension
-     +------------------+
-     |   Web Server     |
-     |      -----       |
-     | FatFS  | uIP     |
-     |	    -----       |                     ----------
-     | SD Drv | Eth Drv |-----Ethernet--------| Router |
-     +------------------+                     ----------
-				</pre>
-				Both Ethernet and SD use the SPI protocol for communication so we first implemented SPI drivers
-				for both SPI0 and SPI1. 
-				We connected the ethernet extension board to spi0 and the sd reader to spi1. <br />
-				FatFS by chan was used as the filesystem layer of the SD.<br />
-				uIP was used as a protocol stack and it's webserver as an HTTP server on top of which 
-				we implemented a simple directory listing of the SD contents.<br />
-				The board gets its IP address using DHCP.
-			</div> 
-			<!-- text -->
-			<div class="head_img">
-			    <a name="download"></a>
-			    <img src="img/dls.gif" alt="Download" width="481" height="44"/> 
-			</div>
-			<div class="text_index">
-			    You can download the code from <a href="http://code.google.com/p/tauembedded/" target="_blank">our Google Code account</a>
-			</div> 
-			<!-- text -->
+			    <h1 id="intro">Introduction</h1>
+			    <div class="text_index">
+				    In this project we set out to create a simple network attached storage device using a LPC2148 Board, it's ethernet extension and an SD Card.
+			    </div>
+			    <!-- text -->
+			    <h1 id="sw_highlevel_design">SW high-level design</h1> 
+			    <div class="text_index">
+				    This section describes high level details of the software organization. <br>
+				    The whole mechanism is built out of several components (software modules) designed to perform a designated role. <br>
+				    Not all of these modules were written by us, most are porting of open source code. <br>
+				    <h3>Components:</h3>
+				    <ul>
+					    <li><b>SD Server : </b>based on the httpd web server application example from uIP.
+					    This module is responsible for HTTP serving of files over TCP/IP. <br>
+					    The file system is abstracted by the FServ component.</li>
+					    <li><b>DHCPC : </b>porting of the dhcpc application example from uIP. 
+					    This module has one time role during system boot to acquire an IP address for the server.</li>
+					    <li><b>Uip : </b>Porting of uIP 1.0 TCP/IP stack. Written by Adam Dunkels.</li>
+					    <li><b>Ethernet Driver : </b>Porting of a standard enc28j60 MicroChip ethernet controller with SPI interface.</li>
+					    <li><b>FServ : </b>Simplified file system interface and uniform access to directory list and file elements.
+					    This layer works on top of the FatFS file system module and is also responsible for html document generation in case of
+					    directory browsing.
+					    <li><b>FatFS : </b>Porting of FatFS embedded file system module. Written by ChaN.</li>
+					    <li><b>I/O Device Driver : </b>Simple FatFS interface device driver for accessing the SD cards.</li>
+					    <li><b>SD/MMC Driver : </b>Partial implementation of the SD/MMC protocol. Porting of an example for implementation from NXP.</li>
+					    <li><b>SPI {0,1} : </b> Both Ethernet and SD/MMC use SPI as a bus. 
+					    Separated as two distinct drivers to exploit the two SPI bus controllers available on board.</li>
+				    </ul>
 
-			<div class="head_img">
-			    <a name="screenshots"></a>
-			    <img src="img/sshots.gif" alt="Screenshots" width="481" height="44"/> 
-			</div>
-			<div class="text_index">
-			    Content
-			    <p>&nbsp;</p>
-			</div> 
-			<!-- text -->
-			<div class="head_img">
-			    <a name="faq"></a>
-			    <img src="img/faq.gif" alt="FAQ" width="481" height="44"/> 
-			</div>
-			<div class="text_index">
-				<p class="question">What do I need in order to run this code ?</p>
-				<p class="ans">You will need the following:<br />
-				<ul>
-					<li><a target="_blank" href="http://www.embeddedartists.com/products/education/edu_2148.php">Embedded Artists LPC2148 Education Board (v2 or v3)</a></li>
-					<li><a target="_blank" href="http://www.embeddedartists.com/products/education/edu_eth.php">10M Ethernet Expansion Board</a> or <a target="_blank" href="http://www.embeddedartists.com/products/education/edu_expansion.php">Experiment Expansion Board</a></li>
-					<li><a target="_blank" href="http://www.gnuarm.com/">The GNU ARM Toolchain</a></li>
-				</ul>
-				</p>
-				<p class="question">Under which license is your code released ?</p>
-				<p class=ans">The code is release under GPLv3</p>
-				<p class="question">Does your code have any known issues ?</p>
-				<p class="ans">You can look at our <a href="http://code.google.com/p/tauembedded/issues/list">GoogleCode issue list</a>
-				<br/>
-				We will also appreciate it if you tell us about bugs or problems you find in our code.
-				<p class="question">How does the pins on the board need to be set in order to make your code work ?</p>
-				<p class="ans">You should set ethernet to work with spi0 and sd to work with spi1. Here is a picture with the correct pin setting:
-				<img src="" alt="LPC2148 pin settings"/>
-			       </p>
-				</p>
+				    The project as a mechanism can be depicted by the following diagram:
+				    <img src="img/swhigh.jpg" />												
+			    </div> 
+			    <!-- text -->
+			    <h1 id="how_works">How It Works</h1> 
+			    <div class="text_index">
+				    How It Works section
+			    </div>
+			    <!-- text -->
+			    <h1 id="download">Download</h1>
+			    <div class="text_index">
+				    You can download the code from <a href="http://code.google.com/p/tauembedded/" target="_blank">our Google Code account</a>
+			    </div> 
+			    <!-- text -->
+			    <h1 id"screenshots">Screenshots</h1> 
+			    <div class="text_index">
+				    Content
+				    <p>&nbsp;</p>
+			    </div> 
+			    <!-- text -->
+			    <h1 id="faq">FAQ</h1>
+			    <div class="text_index">
+				    <p class="question">What do I need in order to run this code ?</p>
+				    <p class="ans">You will need the following:<br />
+				    <ul>
+					    <li><a target="_blank" href="http://www.embeddedartists.com/products/education/edu_2148.php">Embedded Artists LPC2148 Education Board (v2 or v3)</a></li>
+					    <li><a target="_blank" href="http://www.embeddedartists.com/products/education/edu_eth.php">10M Ethernet Expansion Board</a> or <a target="_blank" href="http://www.embeddedartists.com/products/education/edu_expansion.php">Experiment Expansion Board</a></li>
+					    <li><a target="_blank" href="http://www.gnuarm.com/">The GNU ARM Toolchain</a></li>
+				    </ul>
+				    </p>
+				    <p class="question">Under which license is your code released ?</p>
+				    <p class=ans">The code is release under GPLv3</p>
+				    <p class="question">Does your code have any known issues ?</p>
+				    <p class="ans">You can look at our <a href="http://code.google.com/p/tauembedded/issues/list">GoogleCode issue list</a>
+				    <br/>
+				    We will also appreciate it if you tell us about bugs or problems you find in our code.
+				    <p class="question">How does the pins on the board need to be set in order to make your code work ?</p>
+				    <p class="ans">You should set ethernet to work with spi0 and sd to work with spi1. <br />
+				    On the Ethernet extension: SO,SI and SCK pins should be set to SPI0 as drawn on the board itself <br />
+				    On LPC2148 you should set the SD card to work with SPI1. <br />
+				    The following images describe the correct jumper setting: <br />
+				    For LPC2148 (v2):<br />
+				    <img src="img/HW_jumpers.jpg" alt="LPC2148 jumper settings"/>
+				    <br /><br />
+				    For the ethernet extension: <br />
+				    <img src="img/eth_jumpers.gif" alt="Ethernet extension jumper settings"/>
+				    </p>
+			    </div> 
+			    <!-- text -->
+			    <h1 id="future_work">Future Work</h1>
+			    <div class="text_index">
+				Future Work section
+			    </div> 
 
-			</div> 
-			<!-- text -->
-			<div class="head_img">
-			    <a name="about"></a>
-			    <img src="img/cont.gif" alt="About+Contact" width="481" height="44"/> 
-			</div>
-			<div class="text_index">
-				<p>This project was done by Michael Gendelman and Eyal Widder as part of the course <a href="http://tau.ac.il/~stoledo/Courses/Embedded/" target="_blank">"Advanced Computer Systems: Embedded Systems"</a> at the Tel-Aviv University.</p>
-				<br />
-				<p>Our emails:<br />
-				&nbsp;&nbsp;Michael: genged at gmail dot com <br />
-				&nbsp;&nbsp;Eyal: wieyal at gmail dot com <br />
-				
-			</div> 
-			<!-- text -->
+			    <!-- text -->
+			    <h1 id="about">About & Contact</h1> 
+			    <div class="text_index">
+				    <p>This project was done by Michael Gendelman and Eyal Widder as part of the course <a href="http://tau.ac.il/~stoledo/Courses/Embedded/" target="_blank">"Advanced Computer Systems: Embedded Systems"</a> at the Tel-Aviv University.</p>
+				    <br />
+				    <p>Our emails:<br />
+				    &nbsp;&nbsp;Michael: genged at gmail dot com <br />
+				    &nbsp;&nbsp;Eyal: wieyal at gmail dot com <br />
+
+			    </div> 
+			    <!-- text -->
 
 
 
-			<div id="copyright">&copy; 2010, Eyal Widder &amp; Michael Gendelman</div>
+			    <div id="copyright">&copy; 2010, Eyal Widder &amp; Michael Gendelman</div>
 		    </div>
-		</div> <!-- right -->
-	    </div> <!-- content_cont -->
+	    </div> <!-- right -->
+    </div> <!-- content_cont -->
 	</div> <!-- wrapper -->
-	</body>
+</body>
     </html>
