@@ -7,6 +7,8 @@
 
 #include "network.h"
 
+#include "lcd.h"
+
 #include "uip.h"
 #include "uip_arp.h"
 #include "timer.h"
@@ -27,7 +29,7 @@
 
 int dhcp_done = 0;
 
-DEFINE_pmesg_level(MSG_INFO);
+DEFINE_pmesg_level(MSG_DEBUG);
 
 void uip_log(char *m)
 {
@@ -53,19 +55,33 @@ void pmesg_hex(int level, uint8_t *buf, unsigned int len)
 }
 
 void dhcpc_configured(const struct dhcpc_state *s) {
-	char ipmsg[20];
-	uip_sethostaddr(s->ipaddr);
-	sprintf(ipmsg, "IP = %d.%d.%d.%d",
-		((u8_t*)s->ipaddr)[0],
-		((u8_t*)s->ipaddr)[1],
-		((u8_t*)s->ipaddr)[2],
-		((u8_t*)s->ipaddr)[3]);
+    uip_sethostaddr(s->ipaddr);
+    uip_setdraddr(s->default_router);
+    uip_setnetmask(s->netmask);
 
-	lcdPrintString(ipmsg);
+    pmesg(MSG_INFO, "- Setting IP to: `%d.%d.%d.%d'\n", 
+	    uip_ipaddr1(s->ipaddr), 
+	    uip_ipaddr2(s->ipaddr), 
+	    uip_ipaddr3(s->ipaddr), 
+	    uip_ipaddr4(s->ipaddr));
+    pmesg(MSG_INFO, "- Setting default router IP to: `%d.%d.%d.%d'\n", 
+	    uip_ipaddr1(s->default_router), 
+	    uip_ipaddr2(s->default_router), 
+	    uip_ipaddr3(s->default_router), 
+	    uip_ipaddr4(s->default_router));
 
- 	/* Set ip address cookie in file system */
-        fsSetIp((u8_t*)&s->ipaddr);
-	dhcp_done = 1;	
+    char ipmsg[20];
+    sprintf(ipmsg, "IP = %d.%d.%d.%d",
+	    ((u8_t*)s->ipaddr)[0],
+	    ((u8_t*)s->ipaddr)[1],
+	    ((u8_t*)s->ipaddr)[2],
+	    ((u8_t*)s->ipaddr)[3]);
+
+    lcdPrintString(ipmsg);
+
+    /* Set ip address cookie in file system */
+    fsSetIp((u8_t*)&s->ipaddr);
+    dhcp_done = 1;	
 }
 
 int main(void)
@@ -79,8 +95,8 @@ int main(void)
     uip_ipaddr_t ipaddr, cookieip;
     struct timer periodic_timer, arp_timer;
 
-    timer_set(&periodic_timer, CLOCK_SECOND * 1);
-    timer_set(&arp_timer, CLOCK_SECOND * 1);
+    timer_set(&periodic_timer, CLOCK_SECOND * 2);
+    timer_set(&arp_timer, CLOCK_SECOND * 2);
 
     VPBDIV = 0x02;
 
@@ -93,6 +109,9 @@ int main(void)
     clock_init();
 
     pmesg(MSG_INFO, "- Started Uart\n");
+
+    pmesg(MSG_INFO, "- Started SD Card & Filesystem\n");
+    fsInit();
 
     pmesg(MSG_INFO, "- Starting Network...");
     network_init();
@@ -116,12 +135,11 @@ int main(void)
     // Fetch IP address cookie from SD.
     fsGetIp(cookieip);   
 
- 
     while(1) {
 
         if (!dhcp_done)
         {
-            pmesg(MSG_DEBUG, "setting cookie ip address : %d.%d.%d.%d\n",
+            pmesg(MSG_DEBUG, "Setting cookie ip address : %d.%d.%d.%d\n",
                ((u8_t*)cookieip)[0],      
                ((u8_t*)cookieip)[1],      
                ((u8_t*)cookieip)[2],      
@@ -129,13 +147,11 @@ int main(void)
 
 	    // set ip according to cookie.
             uip_sethostaddr(cookieip);
-
        }
 
 	uip_len = network_read(uip_buf);
 	if(j++ % 1000 == 0) {
 	    pmesg(MSG_DEBUG_MORE, "loop %ld\n", j);
-	    //dhcpc_request();
 	}
 	if(uip_len > 0) 
 	{
@@ -170,27 +186,14 @@ int main(void)
 		}
 	    }
 	}
-#if 1	
 	else if(timer_expired(&periodic_timer)) 
 	{
-	    //pmesg(MSG_DEBUG, "Timer expired: periodic timer (%d)\n", periodic_timer.start);
+	    pmesg(MSG_DEBUG_MORE, "Timer expired: periodic timer (%d)\n", periodic_timer.start);
 	    timer_reset(&periodic_timer);
-	    
 
-   	    for(i = 0; i < UIP_UDP_CONNS; i++) {
-	    uip_udp_periodic(i);
-	    /*  If the above function invocation resulted in data that
-		should be sent out on the network, the global variable
-		uip_len is set to a value > 0. */
-	    if(uip_len > 0) {
-                uip_arp_out();
-		network_send(uip_buf, uip_len);
-	    }
-	}
-
-            for(i = 0; i < UIP_CONNS; i++) 
+	    for(i = 0; i < UIP_CONNS; i++) 
 	    {
-                uip_periodic(i);
+		uip_periodic(i);
 		/* If the above function invocation resulted in data that
 		   should be sent out on the network, the global variable
 		   uip_len is set to a value > 0. */
@@ -200,13 +203,21 @@ int main(void)
 		    network_send(uip_buf, uip_len);
 		}
 	    }
-	}
-
 
 #if UIP_UDP
-
+	    for(i = 0; i < UIP_UDP_CONNS; i++) {
+		uip_udp_periodic(i);
+		/*  If the above function invocation resulted in data that
+		    should be sent out on the network, the global variable
+		    uip_len is set to a value > 0. */
+		if(uip_len > 0) {
+		    pmesg(MSG_DEBUG, "Sending udp response...\n");
+		    uip_arp_out();
+		    network_send(uip_buf, uip_len);
+		}
+	    }
 #endif /*  UIP_UDP */
-
+	}
 
 	/* Call the ARP timer function every 10 seconds. */
 	if(timer_expired(&arp_timer)) 
@@ -215,8 +226,8 @@ int main(void)
 	    timer_reset(&arp_timer);
 	    uip_arp_timer();
 	}
-#endif
     } // while(1)
 
     return 0;
 }
+
