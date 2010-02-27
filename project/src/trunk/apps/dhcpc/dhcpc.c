@@ -175,13 +175,9 @@ send_discover(void)
     pmesg(MSG_DEBUG, "send_discover\n");
     u8_t *end;
     struct dhcp_msg *m = (struct dhcp_msg *)uip_appdata;
-    pmesg(MSG_DEBUG, "a\n");
     create_msg(m);
-    pmesg(MSG_DEBUG, "b\n");
     end = add_msg_type(&m->options[4], DHCPDISCOVER);
-    pmesg(MSG_DEBUG, "c\n");
     end = add_req_options(end);
-    pmesg(MSG_DEBUG, "d\n");
     end = add_end(end);
     pmesg(MSG_DEBUG, "send_discover: before uip_send\n");
     uip_send(uip_appdata, end - (u8_t *)uip_appdata);
