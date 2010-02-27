@@ -116,7 +116,59 @@
 					dhcpc_init(macaddr.addr, sizeof(macaddr.addr));<br />
 				</code>
 				<h2>Getting an IP</h2>
-				...
+				The project implements a DHCP Client in order to obtain an IP dynamically at boot time 
+				when connected to a router.<br />
+				Basically there are three steps to obtain the IP : <br />
+				1. The client broadcasts a DHCP_DISCOVER packet. <br />
+				2.a. The router responds with a DHCP_OFFER packet including a free valid IP address. <br />
+				<i>-  or  -</i> <br />
+				2.b. The router broadcasts an ARP packet to the previous device IP if it already has one. <br />
+				3. The device sends a DHCP_REQUEST packet with his requested IP address. <br />
+				4. Router sends DHCP_REQUEST_ACK packet if completed successfully. <br />
+				
+				DHCP client sequence is coded as following:
+				<pre>
+handle_dhcp() 
+{ 
+	... 
+	send_discover(); 
+	... 
+	if (uip_newdata() && parse_msg() == DHCPOFFER) 
+	{ 
+  	  do {
+		...
+		send_request();
+		...
+		if(uip_newdata() && parse_msg() == DHCPACK) 
+		{
+		  s.state = STATE_CONFIG_RECEIVED;
+		  break;
+		}
+		...                    
+	  } while (s.state != STATE_CONFIG_RECEIVED);
+		
+		dhcpc_configured(&s);				
+	}
+} 
+</pre>
+Then the dhcpc_configure() routine is responsible for setting the host addr and default gateway. <br/>
+In order for the host to remember its previous IP address when required (case 2.b. above) we also store
+a cookie on the SD card inserted. <br/>
+This cookie is read and used in next boot time and if during the DHCP sequence the router 
+sends broadcast to the IP in the cookie the board will respond. <br/>
+This function also shows LCD output for the configured IP address. <br/>
+<pre>
+dhcpc_configure(const struct dhcpc_state *s) 
+{
+    uip_sethostaddr(s->ipaddr);
+    uip_setdraddr(s->default_router);
+    uip_setnetmask(s->netmask);
+	...    
+    lcdPrintString(ipmsg);
+	...
+    fsSetIp((u8_t*)&s->ipaddr);
+}
+</pre>
 				<h2>Serving requests</h2>
 				The HTTP implementation supports only HTTP GET. 
 				When the server receives a GET request it parses it 
