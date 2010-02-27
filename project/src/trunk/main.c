@@ -25,7 +25,7 @@
 #define MY_MAC_ADDR	{ 0x00, 0xf8, 0xc1, 0xd8, 0xc7, 0xa6} 
 #define MSG_UIP_LOG	MSG_INFO
 
-extern u16_t uip_slen;
+int dhcp_done = 0;
 
 DEFINE_pmesg_level(MSG_INFO);
 
@@ -53,7 +53,19 @@ void pmesg_hex(int level, uint8_t *buf, unsigned int len)
 }
 
 void dhcpc_configured(const struct dhcpc_state *s) {
+	char ipmsg[20];
 	uip_sethostaddr(s->ipaddr);
+	sprintf(ipmsg, "IP = %d.%d.%d.%d",
+		((u8_t*)s->ipaddr)[0],
+		((u8_t*)s->ipaddr)[1],
+		((u8_t*)s->ipaddr)[2],
+		((u8_t*)s->ipaddr)[3]);
+
+	lcdPrintString(ipmsg);
+
+ 	/* Set ip address cookie in file system */
+        fsSetIp((u8_t*)&s->ipaddr);
+	dhcp_done = 1;	
 }
 
 int main(void)
@@ -64,7 +76,7 @@ int main(void)
 	.addr = MY_MAC_ADDR
     };
 
-    uip_ipaddr_t ipaddr;
+    uip_ipaddr_t ipaddr, cookieip;
     struct timer periodic_timer, arp_timer;
 
     timer_set(&periodic_timer, CLOCK_SECOND * 1);
@@ -73,6 +85,8 @@ int main(void)
     VPBDIV = 0x02;
 
     fopen("uart0", "w");
+
+    lcdInit();
 
     fsInit(); //init fileserver module.
 
@@ -94,22 +108,33 @@ int main(void)
 	    "- Setting MAC address to `%.2x:%.2x:%.2x:%.2x:%.2x:%.2x'\n", 
 	    macaddr.addr[0], macaddr.addr[1], macaddr.addr[2], 
 	    macaddr.addr[3], macaddr.addr[4],macaddr.addr[5]);
-
-    //uip_ipaddr(ipaddr, 12, 12, 12, 13);
-    //uip_sethostaddr(ipaddr);
-    //pmesg(MSG_INFO, "- Setting IP to: `%d.%d.%d.%d'\n", 12, 12, 12, 13);
-
-    //uip_ipaddr(ipaddr, 192, 168, 2, 1);
-    //uip_setdraddr(ipaddr);
-    //pmesg(MSG_INFO, "- Setting default router IP to: `%d.%d.%d.%d'\n", 192, 168, 2, 1);
-
+   
     httpd_init();
+    dhcp_done = 0;
     dhcpc_init(macaddr.addr, sizeof(macaddr.addr));
+    
+    // Fetch IP address cookie from SD.
+    fsGetIp(cookieip);   
 
+ 
     while(1) {
+
+        if (!dhcp_done)
+        {
+            pmesg(MSG_DEBUG, "setting cookie ip address : %d.%d.%d.%d\n",
+               ((u8_t*)cookieip)[0],      
+               ((u8_t*)cookieip)[1],      
+               ((u8_t*)cookieip)[2],      
+               ((u8_t*)cookieip)[3]);
+
+	    // set ip according to cookie.
+            uip_sethostaddr(cookieip);
+
+       }
+
 	uip_len = network_read(uip_buf);
 	if(j++ % 1000 == 0) {
-	    pmesg(MSG_INFO, "loop %ld\n", j);
+	    pmesg(MSG_DEBUG_MORE, "loop %ld\n", j);
 	    //dhcpc_request();
 	}
 	if(uip_len > 0) 
