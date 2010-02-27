@@ -36,6 +36,16 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize
 */
 FRESULT fsGetElementData(const char* path, char* dataBuff, int offset, int bytesToRead);
 
+
+/* Interface for a file system based cookie storing ip address.
+    should be used at startup to resolve our prev. IP address.
+*/
+void fsGetIp(unsigned char* pIp);
+
+/* Interface for manipulation of the ip cookie.
+*/
+void fsSetIp(const unsigned char* pIp);
+
 #endif // _FSERV_H__
 
 //end of file

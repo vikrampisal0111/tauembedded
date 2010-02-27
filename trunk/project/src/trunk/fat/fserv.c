@@ -2,6 +2,9 @@
 #include "debug.h"
 #include "lcd.h"
 
+
+#define IP_COOKIE "0:/ip.bin"
+
 // Simple html for directory listing from Apache2.2 server.
 // TODO: generate more decorated / informative documents.
 static char html_head[] = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\"> \
@@ -219,6 +222,59 @@ int offset, int bytesToRead)
 
    return fsres;
 
+}
+
+void fsSetIp(const unsigned char* pIp)
+{
+   FRESULT fsres;
+   FIL file; 
+   WORD bytesWritten;
+
+
+
+
+   fsres = f_open(&file, IP_COOKIE, FA_CREATE_NEW | FA_CREATE_ALWAYS | FA_WRITE);
+   pmesg(MSG_INFO, "open ip cookie : ___ ");
+   if (fsres != FR_OK) return;
+
+// write ip 4 bytes.
+   fsres = f_write(&file, pIp, 4, &bytesWritten);
+
+   if (fsres != FR_OK) return;
+   pmesg(MSG_INFO, "written %d bytes to ip cookie\n", bytesWritten);
+
+   fsres = f_close(&file);
+   
+}
+
+void fsGetIp(unsigned char* pIp)
+{
+   FRESULT fsres;
+   FIL file;
+   FILINFO inf;
+   WORD bytesRead;
+
+  //default IP is zero in case of error.
+   memset(pIp, 0, 4);
+
+   fsres = f_stat(IP_COOKIE, &inf);
+
+   if ((inf.fsize < 4) || (fsres != FR_OK))
+   	return;
+
+   fsres = f_open(&file, IP_COOKIE, FA_READ);
+   pmesg(MSG_INFO, "open ip cookie : ___ ");
+   if (fsres != FR_OK) return;
+
+// write ip 4 bytes.
+   fsres = f_read(&file, pIp, 4, &bytesRead);
+
+   if (fsres != FR_OK) return;
+   pmesg(MSG_INFO, "read %d bytes from ip cookie\n", bytesRead);
+
+   fsres = f_close(&file);
+
+   return; 
 }
 
 
