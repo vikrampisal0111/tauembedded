@@ -83,7 +83,7 @@ FRESULT fsGetElementInfo(const char* path, fsElemType* elemType, DWORD* byteSize
 
     constructFsPath(path);
 
-    pmesg(MSG_INFO, "fserv: Full path = %s\n", fspath);
+    pmesg(MSG_DEBUG, "fserv: Full path = %s\n", fspath);
 
     // Get element type.
     fsres = f_stat(fspath, &inf);
@@ -217,7 +217,7 @@ FRESULT fsGetElementData(const char* path, char* dataBuff,
     {
 	case FSERV_FILE:      
 	    fsres = f_open(&file, fspath, FA_READ);
-	    pmesg(MSG_INFO, "serving file\n");
+	    pmesg(MSG_INFO, "* Serving file\n");
 	    if (fsres != FR_OK) 
 	    {
 		return fsres;
@@ -245,7 +245,7 @@ FRESULT fsGetElementData(const char* path, char* dataBuff,
 	    {      
 		memset(dir_list_buffer, 0, sizeof(dir_list_buffer));
 		fsres = f_opendir(&dir, fspath);
-		pmesg(MSG_INFO, "serving directory %s\n", fspath);
+		pmesg(MSG_INFO, "* Serving directory %s\n", fspath);
 
 		if (fsres) return fsres;
 
