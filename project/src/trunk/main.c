@@ -142,18 +142,6 @@ int main(void)
 
     while(1) {
 
-        if (!dhcp_done)
-        {
-            pmesg(MSG_DEBUG, "Setting cookie ip address : %d.%d.%d.%d\n",
-               ((u8_t*)cookieip)[0],      
-               ((u8_t*)cookieip)[1],      
-               ((u8_t*)cookieip)[2],      
-               ((u8_t*)cookieip)[3]);
-
-	    // set ip according to cookie.
-            uip_sethostaddr(cookieip);
-       }
-	
 	if(j++ % 1000 == 0) {
 	    pmesg(MSG_DEBUG_MORE, "loop %ld\n", j);
 	}
