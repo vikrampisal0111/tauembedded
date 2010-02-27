@@ -176,7 +176,15 @@
 			    <h1 id="future_work">Future Work</h1>
 			    <div class="text_index">
 				<ul>
-					<li>One important feature that this projects lacks is the ability to upload files to the board. This can be achieved by implementing an ftp server on the board or by extending the http server implemntation in order to support HTTP PUT or HTTP POST which gives the abillity to upload files.</li>
+					<li><b>Upload files : </b>One important feature that this projects lacks is the ability to upload files to the board. <br> This can be achieved by implementing an ftp server on the board or by extending the http server implemntation in order to support HTTP PUT or HTTP POST which gives the abillity to upload files.</li>
+					<li><b>Server side scripting : </b>there is some basic scripting code available in the httpd 
+					 web server example from uIP, <br> however we did not use it and it could be a nice future extension to
+					 use such scripting combined with user interaction to create an interface to the board features. <br>
+					 (e.g. turn the rotor, display messages to the LCD or blink leds).</li>
+					<li><b>Server configurability : </b> There is no supported configurations, the server has only one hard coded configurations
+					and it could be nice to add the ability to configure the server either at compile or even better at run time.</li>
+                	<li><b>USB interface : </b> Simple interface could be used (with terminal or a driver) to convey commands to the
+					web server such as server configuration. <br> It could be interleaved with a USB mass storage driver to edit the card content.</li>
 				</ul>
 
 			    </div> 
