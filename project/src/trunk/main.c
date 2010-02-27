@@ -23,6 +23,9 @@
 //#include "simple.h"
 #include "webserver.h"
 
+// Use ip as cookie file for answering ARP messages from router.
+#define USE_COOKIE
+
 #define ETH_BUF		((struct uip_eth_hdr *)&uip_buf[0])
 #define MY_MAC_ADDR	{ 0x00, 0xf8, 0xc1, 0xd8, 0xc7, 0xa6} 
 #define MSG_UIP_LOG	MSG_INFO
@@ -58,7 +61,7 @@ void dhcpc_configured(const struct dhcpc_state *s) {
     uip_sethostaddr(s->ipaddr);
     uip_setdraddr(s->default_router);
     uip_setnetmask(s->netmask);
-
+  
     pmesg(MSG_INFO, "- Setting IP to: `%d.%d.%d.%d'\n", 
 	    uip_ipaddr1(s->ipaddr), 
 	    uip_ipaddr2(s->ipaddr), 
@@ -70,6 +73,7 @@ void dhcpc_configured(const struct dhcpc_state *s) {
 	    uip_ipaddr3(s->default_router), 
 	    uip_ipaddr4(s->default_router));
 
+    pmesg(MSG_INFO,"*~*~*~*DHCPC CONFIGURED*~*~*~*\n\n\n");
     char ipmsg[20];
     sprintf(ipmsg, "IP = %d.%d.%d.%d",
 	    ((u8_t*)s->ipaddr)[0],
@@ -77,6 +81,7 @@ void dhcpc_configured(const struct dhcpc_state *s) {
 	    ((u8_t*)s->ipaddr)[2],
 	    ((u8_t*)s->ipaddr)[3]);
 
+    lcdClearScreen(); 
     lcdPrintString(ipmsg);
 
     /* Set ip address cookie in file system */
@@ -148,8 +153,7 @@ int main(void)
 	    // set ip according to cookie.
             uip_sethostaddr(cookieip);
        }
-
-	uip_len = network_read(uip_buf);
+	
 	if(j++ % 1000 == 0) {
 	    pmesg(MSG_DEBUG_MORE, "loop %ld\n", j);
 	}
@@ -160,7 +164,6 @@ int main(void)
 
 	    if(ETH_BUF->type == htons(UIP_ETHTYPE_IP)) 
 	    {
-		pmesg(MSG_DEBUG, "Type: IP\n");
 		uip_arp_ipin();
 		uip_input();
 		/* If the above function invocation resulted in data that
@@ -173,17 +176,36 @@ int main(void)
 		    uip_arp_out();
 		    network_send(uip_buf, uip_len);
 		}
+
+
 	    } 
 	    else if(ETH_BUF->type == htons(UIP_ETHTYPE_ARP)) 
 	    {
 		pmesg(MSG_DEBUG, "Type: ARP\n");
-		uip_arp_arpin();
+	        pmesg(MSG_DEBUG, "Type: IP\n");
+		
+#ifdef USE_COOKIE
+                if (!dhcp_done)
+		{
+		   uip_sethostaddr(cookieip);
+		}
+#endif
+
+	uip_arp_arpin();
 		/* If the above function invocation resulted in data that
 		   should be sent out on the network, the global variable
 		   uip_len is set to a value > 0. */
 		if(uip_len > 0) {
 		    network_send(uip_buf, uip_len);
 		}
+
+#ifdef USE_COOKIE
+		if (!dhcp_done)
+		{
+		   uip_ipaddr(ipaddr, 0,0,0,0);
+		   uip_sethostaddr(ipaddr);
+		}
+#endif
 	    }
 	}
 	else if(timer_expired(&periodic_timer)) 
