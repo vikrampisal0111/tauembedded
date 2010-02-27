@@ -41,6 +41,39 @@
 		</div> <!-- left -->
 		<div id="right">
 		    <div id="content">
+			<!-- text -->
+			<div class="head_img">
+			    <a name="sw_high"></a>
+			    <img src="img/swh.gif" alt="SW high-level design" width="481" height="44"/> 
+			</div>
+			<div class="text_index">
+			    This section describes high level details of the software organization. <br>
+				The whole mechanism is built out of several components (software modules) designed to perform a designated role. <br>
+				Not all of these modules were written by us, most are porting of open source code. <br>
+				<h3>Components:</h3>
+				<ul>
+				<li><b>SD Server : </b>based on the httpd web server application example from uIP.
+				This module is responsible for HTTP serving of files over TCP/IP. <br>
+				The file system is abstracted by the FServ component.</li>
+				<li><b>DHCPC : </b>porting of the dhcpc application example from uIP. 
+				This module has one time role during system boot to acquire an IP address for the server.</li>
+				<li><b>Uip : </b>Porting of uIP 1.0 TCP/IP stack. Written by Adam Dunkels.</li>
+				<li><b>Ethernet Driver : </b>Porting of a standard enc28j60 MicroChip ethernet controller with SPI interface.</li>
+				<li><b>FServ : </b>Simplified file system interface and uniform access to directory list and file elements.
+				This layer works on top of the FatFS file system module and is also responsible for html document generation in case of
+				directory browsing.
+				<li><b>FatFS : </b>Porting of FatFS embedded file system module. Written by ChaN.</li>
+				<li><b>I/O Device Driver : </b>Simple FatFS interface device driver for accessing the SD cards.</li>
+				<li><b>SD/MMC Driver : </b>Partial implementation of the SD/MMC protocol. Porting of an example for implementation from NXP.</li>
+				<li><b>SPI {0,1} : </b> Both Ethernet and SD/MMC use SPI as a bus. 
+				Separated as two distinct drivers to exploit the two SPI bus controllers available on board.</li>
+				</ul>
+				
+				The project as a mechanism can be depicted by the following diagram:
+				<img src="img/SW_High_Level.jpg"/>										
+				
+			</div> 
+			<!-- text -->
 			<div class="text_index">
 				In this project we set out to create a simple network attached storage device using a LPC2148 Board and an SD Card.
 				The general architecture looks like this:
